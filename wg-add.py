@@ -2,18 +2,13 @@ import sys
 import os
 from typing import OrderedDict
 import wgconfig
+import ipaddress
+import netifaces
+import validators
 from wgconfig import wgexec
-# import wireguard
 from termcolor import colored, cprint
 from pathlib import Path
-from subnet import (
-    IPv4Address,
-    IPv6Address,
-    IPv4Network,
-    IPv6Network,
-    ip_address,
-    ip_network,
-)
+
 
 def main():
     # Check if program is being run as root
@@ -87,12 +82,199 @@ def main():
     print(f"Selected operation: {colored(selectedOperation.get('short'), attrs=['bold'])}\n")
 
     if selectedOperation.get('short') == "add":
+
+        listenPorts = [int(wc.interface.get('ListenPort'))]
+
+        recommendedEndpoints = []
+        for iface in netifaces.interfaces():
+            addrs = netifaces.ifaddresses(iface)
+            if netifaces.AF_INET in addrs.keys():
+                for addr in addrs[netifaces.AF_INET]:
+                    if ipaddress.ip_address(addr.get('addr')).is_global:
+                        recommendedEndpoints.append(ipaddress)
+            if netifaces.AF_INET6 in addrs.keys():
+                for addr in addrs[netifaces.AF_INET6]:
+                    if ipaddress.ip_address(addr.get('addr')).is_global:
+                        recommendedEndpoints.append(ipaddress)
+
+        if '.' in os.uname()[0]:
+            recommendedEndpoints.append(os.uname()[1])
+
+        selection = 0
+        validInput = False
+        while not validInput:
+            print(f"{colored('Endpoint port', attrs=['bold'])}\nPlease select an endpoint port to use or input your own:")
+            for x in range(len(listenPorts)):
+                print("[%2d] %s" % (x, listenPorts[x]))
+
+            selection = input(prompt)
+            inputIsNotPort = False
+            try:
+                try:
+                    selection = int(selection)
+                    if (selection >= 0 ) and (selection < len(listenPorts)):
+                        selectedListenPort = listenPorts[selection]
+                        validInput = True
+                        inputIsNotPort = True
+                except:
+                    pass
+                if not inputIsNotPort:                    
+                    selection = int(selection)
+                    if (selection >= 1) and (selection <= 65535):
+                        selectedListenPort = selection
+                        validInput = True
+                    else:
+                        cprint("Invalid input", 'red')
+            except ValueError:
+                cprint("Input needs to be a valid port number", 'red')
+
+        selection = 0
+        validInput = False
+        while not validInput:
+            print(f"{colored('Endpoint host', attrs=['bold'])}\nPlease select an endpoint host to use or input your own:")
+            for x in range(len(recommendedEndpoints)):
+                print("[%2d] %s" % (x, recommendedEndpoints[x]))
+
+            selection = input(prompt)
+            inputIsDomainOrIP = False
+            try:
+                try:
+                    if not validators.domain(selection):
+                        raise ValueError
+                    selectedAddr = str(selection)
+                    validInput = True
+                    inputIsDomainOrIP = True
+                except:
+                    pass
+                if not inputIsDomainOrIP:
+                    selection = int(selection)
+                    if (selection >= 0 ) and (selection < len(recommendedEndpoints)):
+                        selectedAddr = recommendedEndpoints[selection]
+                        validInput = True
+                    else:
+                        cprint("Invalid input", 'red')                    
+            except ValueError:
+                cprint("Input needs to be a number or an IP without a subnet range", 'red')
+
+        endpoint = selectedAddr + ':' + str(selectedListenPort)
+        print(f"Selected endpoint: {colored(endpoint, attrs=['bold'])}\n")
+
         print("Please input the peer\'s name:")
         peerName = input(prompt)
 
         # Create peers dir if it doesn't exist yet
-        os.makedirs(peersDir, exist_ok=True)
+        os.makedirs(peersDir, mode=644, exist_ok=True)
         peerFilePath = Path(peersDir, peerName + defaultExt)
+        print(f"Peer file will be written to: {colored(peerFilePath, attrs=['bold'])}\n")
+        collectedAddresses = []
+        recommendedAddresses = []
+        if wc.peers == {}:
+            addrRange = wc.interface.get('Address')
+            if type(addrRange) == list:
+                for ipIface in addrRange:
+                    collectedAddresses.append(ipaddress.ip_interface(ipIface))
+            else:
+                collectedAddresses.append(ipaddress.ip_interface(addrRange))
+        else:
+
+            # TODO implement support for multiple values in AllowedIPs coming from existing config
+            tempIPList = []
+            for peer in wc.peers:
+                tempIPList.append(ipaddress.ip_interface(wc.peers.get(peer).get('AllowedIPs')))
+                tempIPList.sort()
+            
+            gapFound = False
+            for x in range(len(tempIPList)):
+                # check if gap between IPs is bigger than 1 to help fill gaps
+                # allows finding multiple gaps
+                if x != 0 and not (tempIPList[x] - 1 == tempIPList[x-1]):
+                    collectedAddresses.append(tempIPList[x-1])
+                    gapFound = True
+                    # break
+            if not gapFound:
+                collectedAddresses.append(tempIPList[:-1])
+                        
+        
+        for x in range(len(collectedAddresses)):
+            addr = collectedAddresses[x]        
+            addr = ipaddress.ip_interface(addr + 1)
+            if not (
+                    addr.is_reserved
+                or addr.is_multicast
+                or addr.is_link_local
+                or addr.is_loopback
+            ):
+                recommendedAddresses.append(addr.ip)
+        
+        
+        selection = 0
+        validInput = False
+        while not validInput:
+            print(f"{colored('Peer IP', attrs=['bold'])}\nPlease select a recommended address or input your own:")
+            for x in range(len(recommendedAddresses)):
+                print("[%2d] %s" % (x, recommendedAddresses[x]))
+                
+            selection = input(prompt)
+            inputIsIP = False
+            try:
+                try:
+                    selectedAddr = ipaddress.ip_address(selection)
+                    validInput = True
+                    inputIsIP = True
+                except:
+                    pass
+                if not inputIsIP:
+                    selection = int(selection)
+                    if (selection >= 0 ) and (selection < len(recommendedAddresses)):
+                        selectedAddr = recommendedAddresses[selection]
+                        validInput = True
+                    else:
+                        cprint("Invalid input", 'red')                    
+            except ValueError:
+                cprint("Input needs to be a number or an IP without a subnet range", 'red')
+        
+        print(f"Selected peer IP: {colored(str(selectedAddr), attrs=['bold'])}\n")
+
+        # Guessing the AllowedIPs from the interface subnet mask and the selected peer IP
+        clientAllowedIPs = [ipaddress.ip_interface(str(selectedAddr) +  "/" + str(ipaddress.ip_interface(wc.interface.get('Address')).netmask)).network]
+
+        selection = 0
+        validInput = False
+        while not validInput:
+            print(f"{colored('AllowedIPs (Peer config)', attrs=['bold'])}\nPlease select a range of AllowedIPs or give your own (comma-separated for multiple ranges, no spaces):")
+            for x in range(len(clientAllowedIPs)):
+                print("[%2d] %s" % (x, clientAllowedIPs[x]))
+                
+            selection = input(prompt)
+            inputIsNet = False
+            try:
+                try:
+                    if ',' in selection:
+                        selectionList = selection.split(',')
+                        for ipNet in selectionList:
+                            selectedNetworks = []
+                            selectedNetworks.append(ipaddress.ip_network(ipNet))
+                    else:
+                        selectedNetworks = ipaddress.ip_network(ipNet)
+                    validInput, inputIsNet = True, True
+                except:
+                    pass
+                if not inputIsNet:
+                    selection = int(selection)
+                    if (selection >= 0 ) and (selection < len(clientAllowedIPs)):
+                        selectedNetworks = clientAllowedIPs[selection]
+                        validInput = True
+                    else:
+                        cprint("Invalid input", 'red')
+            except ValueError:
+                cprint("Input needs to be a number or an IP network", 'red')
+        
+        print(f"Selected AllowedIPs (Peer config): {colored(selectedNetworks, attrs=['bold'])}\n")
+
+        # TODO generate the keypair
+        # TODO write out files
+        wgexec.generate_keypair()
+
 
     elif selectedOperation.get('short') == 'init':
         print("Sorry, this hasn't been implemented yet. Exiting.")
