@@ -93,7 +93,10 @@ def main():
         # Create peers dir if it doesn't exist yet
         os.makedirs(peersDir, exist_ok=True)
         peerFilePath = Path(peersDir, peerName + defaultExt)
-        print(f"Peer file will be written to: {colored(peerFilePath, attrs=['bold'])}")
+
+    elif selectedOperation.get('short') == 'init':
+        print("Sorry, this hasn't been implemented yet. Exiting.")
+        raise NotImplementedError
         
     
     elif selectedOperation.get('short') == 'delete':
