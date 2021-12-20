@@ -97,6 +97,10 @@ def main():
         
     
     elif selectedOperation.get('short') == 'delete':
+        if wc.peers == {}:
+            sys.stderr.write('No peers found in config. Exiting.\n')
+            sys.exit(1)
+
         peersByName = OrderedDict({})
         for peerKey in wc.peers.keys():
             peer = wc.peers.get(peerKey)
