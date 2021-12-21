@@ -271,9 +271,42 @@ def main():
         
         print(f"Selected AllowedIPs (Peer config): {colored(selectedNetworks, attrs=['bold'])}\n")
 
+        persistentKeepalive = True
+
+        selection = 0
+        validInput = False
+        while not validInput:
+            selection = input(f"Add 'PersistentKeepalive = 25' to client config? [Y/n]{prompt} ")
+
+            try:
+                if not selection == '':
+                    selection = selection.lower()
+                    if selection == 'y':
+                        validInput = True
+                    elif selection == 'n':
+                        persistentKeepalive = False
+                        validInput = True
+                    else:
+                        cprint("Invalid input", 'red')
+                else:
+                    validInput = True
+            except ValueError:
+                cprint("Input needs to be either y or n", 'red')
+
+
         # TODO generate the keypair
         # TODO write out files
-        wgexec.generate_keypair()
+        privateKey, publicKey = wgexec.generate_keypair()
+
+        peerConfig = f"""[Interface]
+Address = {selectedAddr}
+PrivateKey = {privateKey}
+
+[Peer]
+PublicKey = {wc.interface.get('PublicKey')}
+Endpoint = {endpoint}
+AllowedIPs = {clientAllowedIPs}
+{"PersistentKeepalive = 25" if persistentKeepalive else ""}"""
 
 
     elif selectedOperation.get('short') == 'init':
