@@ -23,6 +23,17 @@ def main():
     peersDir = "peers"
 
     wgList = []
+    
+    version = "0.1.0"
+    twitterhandle = "das_kaesebrot"
+    website = "https://github.com/das-kaesebrot/wg-interactive"
+    
+    banner = f"""{colored(f'wg-interactive.py v{version}', attrs=['bold'])}
+
+An interactive script for modifying and initializing WireGuard server configuration files and adding/deleting peers.
+by @{twitterhandle}
+Source: {website}"""
+    
 
     for file in os.listdir(wgConfPath):
         if file.endswith(defaultExt):
