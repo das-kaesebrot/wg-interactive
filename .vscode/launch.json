@@ -10,7 +10,10 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "sudo": true
+            "sudo": true,
+            "env": {
+                "WGCONFPATH": "example"
+            }
         }
     ]
 }
