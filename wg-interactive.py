@@ -17,7 +17,9 @@ def main():
         sys.exit(1)
 
     # Static vars
-    wgConfPath = Path("/etc/wireguard")
+    if os.getenv("WGCONFPATH"): wgConfPath = Path(os.getenv("WGCONFPATH"))
+    else: wgConfPath = Path("/etc/wireguard")    
+    
     defaultExt = '.conf'
     prompt = "> "
     peersDir = "peers"
@@ -34,6 +36,7 @@ An interactive script for modifying and initializing WireGuard server configurat
 by @{twitterhandle}
 Source: {website}"""
     
+    print(banner, f"\n\nUsing WireGuard config path {colored(wgConfPath, attrs=['bold'])}")
 
     for file in os.listdir(wgConfPath):
         if file.endswith(defaultExt):
