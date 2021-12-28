@@ -32,6 +32,10 @@ def getAbsWGPath (wgConfPath, selectedWGName, defaultExt):
     return Path(wgConfPath, selectedWGName + defaultExt)
 
 
+def getClientIPWithMaskFromPreviousPeers(wc, ipAddr):
+    print(wc.peers.get(list(wc.peers.keys())[-1]))
+    return ipaddress.ip_interface(str(ipAddr) + "/" + str(ipaddress.ip_interface(wc.peers.get(list(wc.peers.keys())[-1]).get('AllowedIPs')).netmask))
+
 def main():
     # Check if program is being run as root
     if not 'SUDO_UID' in os.environ.keys():
@@ -59,7 +63,7 @@ by @{twitterhandle}
 Source: {website}"""
     
     print(banner, f"\n\nUsing WireGuard config path {colored(wgConfPath, attrs=['bold'])}")
-
+    
     wgList = getWGInterfaces(wgConfPath, defaultExt)
 
     selection = 0
@@ -252,7 +256,7 @@ Source: {website}"""
             inputIsIP = False
             try:
                 try:
-                    selectedAddr = ipaddress.ip_address(selection)
+                    peerIP = ipaddress.ip_address(selection)
                     validInput = True
                     inputIsIP = True
                 except:
@@ -260,17 +264,17 @@ Source: {website}"""
                 if not inputIsIP:
                     selection = int(selection)
                     if (selection >= 0 ) and (selection < len(recommendedAddresses)):
-                        selectedAddr = recommendedAddresses[selection]
+                        peerIP = recommendedAddresses[selection]
                         validInput = True
                     else:
                         cprint("Invalid input", 'red')                    
             except ValueError:
                 cprint("Input needs to be a number or an IP without a subnet range", 'red')
         
-        print(f"Selected peer IP: {colored(str(selectedAddr), attrs=['bold'])}\n")
+        print(f"Selected peer IP: {colored(str(peerIP), attrs=['bold'])}\n")
 
         # Guessing the AllowedIPs from the interface subnet mask and the selected peer IP
-        clientAllowedIPs = [ipaddress.ip_interface(str(selectedAddr) +  "/" + str(ipaddress.ip_interface(wc.interface.get('Address')).netmask)).network]
+        clientAllowedIPs = [ipaddress.ip_interface(str(peerIP) +  "/" + str(ipaddress.ip_interface(wc.interface.get('Address')).netmask)).network]
 
         selection = 0
         validInput = False
@@ -328,20 +332,31 @@ Source: {website}"""
                 cprint("Input needs to be either y or n", 'red')
 
 
-        # TODO generate the keypair
-        # TODO write out files
         privateKey, publicKey = wgexec.generate_keypair()
 
+        clientIPWithNetmaskForConfig = getClientIPWithMaskFromPreviousPeers(wc, peerIP)
+
         peerConfig = f"""[Interface]
-Address = {selectedAddr}
+Address = {clientIPWithNetmaskForConfig}
 PrivateKey = {privateKey}
 
 [Peer]
-PublicKey = {wc.interface.get('PublicKey')}
+PublicKey = {wgexec.get_publickey(wc.interface.get('PrivateKey'))}
 Endpoint = {endpoint}
-AllowedIPs = {clientAllowedIPs}
-{"PersistentKeepalive = 25" if persistentKeepalive else ""}"""
+AllowedIPs = {selectedNetworks}
+{"PersistentKeepalive = 25" if persistentKeepalive else ""}\n"""
 
+        wc.add_peer(publicKey, f"# {peerName}")
+        wc.add_attr(publicKey, 'AllowedIPs', str(clientIPWithNetmaskForConfig))
+        wc.write_file(absWGPath)
+        
+        with open(os.path.join(peersDir, f"{selectedWGName}-{peerName}{defaultExt}"), 'w') as peerfile:
+            peerfile.write(peerConfig)
+            print(f"Wrote peer config to {colored(f'{peersDir}/{selectedWGName}-{peerName}{defaultExt}', attrs=['bold'])}")
+        
+        reloadWGInterfaceIfRunning(selectedWGName, wgConfPath)
+        print("Done!")
+        exit
 
     elif selectedOperation.get('short') == 'init':
         print("Sorry, this hasn't been implemented yet. Exiting.")
@@ -390,11 +405,7 @@ AllowedIPs = {clientAllowedIPs}
                     wc.write_file(absWGPath)
                     print(f"Deleted peer {colored(peerToBeDeleted.get('PublicKey') + ' (' + peerToBeDeleted.get('Name') + ')', attrs=['bold'])}")
                     
-                    if subprocess.run(["wg", "show", selectedWGName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
-                        subprocess.run(["wg", "setconf", selectedWGName, absWGPath])
-                        print(f"Detected that selected WireGuard config is running\nReloaded wireguard interface {colored(selectedWGName, attrs=['bold'])}")
-                    else:
-                        print(f"Selected WireGuard config isn't running, skipping reload")
+                    reloadWGInterfaceIfRunning(selectedWGName, absWGPath)
                     
                     print("Done!")
                     exit
