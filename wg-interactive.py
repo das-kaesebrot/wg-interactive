@@ -125,11 +125,11 @@ Source: {website}"""
             if netifaces.AF_INET in addrs.keys():
                 for addr in addrs[netifaces.AF_INET]:
                     if ipaddress.ip_address(addr.get('addr')).is_global:
-                        recommendedEndpoints.append(ipaddress)
+                        recommendedEndpoints.append(addr.get('addr'))
             if netifaces.AF_INET6 in addrs.keys():
                 for addr in addrs[netifaces.AF_INET6]:
                     if ipaddress.ip_address(addr.get('addr')).is_global:
-                        recommendedEndpoints.append(ipaddress)
+                        recommendedEndpoints.append(addr.get('addr'))
 
         if '.' in os.uname()[0]:
             recommendedEndpoints.append(os.uname()[1])
