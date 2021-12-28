@@ -5,6 +5,7 @@ import wgconfig
 import ipaddress
 import netifaces
 import validators
+from typing import OrderedDict
 from wgconfig import wgexec
 from termcolor import colored, cprint
 from pathlib import Path
