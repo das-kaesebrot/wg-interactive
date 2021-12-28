@@ -1,6 +1,6 @@
 import sys
 import os
-from typing import OrderedDict
+import subprocess
 import wgconfig
 import ipaddress
 import netifaces
@@ -370,6 +370,13 @@ AllowedIPs = {clientAllowedIPs}
                     wc.del_peer(peerToBeDeleted.get('PublicKey'))
                     wc.write_file(absWGPath)
                     print(f"Deleted peer {colored(peerToBeDeleted.get('PublicKey') + ' (' + peerToBeDeleted.get('Name') + ')', attrs=['bold'])}")
+                    
+                    if subprocess.run(["wg", "show", selectedWGName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
+                        subprocess.run(["wg", "setconf", selectedWGName, absWGPath])
+                        print(f"Detected that selected WireGuard config is running\nReloaded wireguard interface {colored(selectedWGName, attrs=['bold'])}")
+                    else:
+                        print(f"Selected WireGuard config isn't running, skipping reload")
+                    
                     print("Done!")
                     exit
                 else:
