@@ -310,7 +310,7 @@ Source: {website}"""
         selection = 0
         validInput = False
         while not validInput:
-            selection = input(f"Add 'PersistentKeepalive = 25' to client config? [Y/n]{prompt} ")
+            selection = input(f"Add 'PersistentKeepalive = 25' to client config? [Y/n] {prompt}")
 
             try:
                 if not selection == '':
