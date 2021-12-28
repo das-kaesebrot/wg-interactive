@@ -11,6 +11,27 @@ from termcolor import colored, cprint
 from pathlib import Path
 
 
+def reloadWGInterfaceIfRunning(ifaceName, absWGPath):                
+    if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
+        subprocess.run(["wg", "setconf", ifaceName, absWGPath])
+        print(f"Detected that selected WireGuard config is running\nReloaded wireguard interface {colored(ifaceName, attrs=['bold'])}")
+    else:
+        print(f"Selected WireGuard config isn't running, skipping reload")
+
+    
+def getWGInterfaces(wgConfPath, defaultExt):
+    returnList = []
+    for file in os.listdir(wgConfPath):
+        if file.endswith(defaultExt):
+            returnList.append(file[:-len(defaultExt)])
+            
+    return returnList
+
+
+def getAbsWGPath (wgConfPath, selectedWGName, defaultExt):
+    return Path(wgConfPath, selectedWGName + defaultExt)
+
+
 def main():
     # Check if program is being run as root
     if not 'SUDO_UID' in os.environ.keys():
@@ -39,9 +60,7 @@ Source: {website}"""
     
     print(banner, f"\n\nUsing WireGuard config path {colored(wgConfPath, attrs=['bold'])}")
 
-    for file in os.listdir(wgConfPath):
-        if file.endswith(defaultExt):
-            wgList.append(file[:-len(defaultExt)])
+    wgList = getWGInterfaces(wgConfPath, defaultExt)
 
     selection = 0
     validInput = False
@@ -60,7 +79,7 @@ Source: {website}"""
             cprint("Input needs to be a number", 'red')
 
     selectedWGName = wgList[selection]
-    absWGPath = Path(wgConfPath, selectedWGName + defaultExt)
+    absWGPath = getAbsWGPath(wgConfPath, selectedWGName, defaultExt)
     print(f"Selected interface: {colored(absWGPath, attrs=['bold'])}\n")
 
     wc = wgconfig.WGConfig(absWGPath)
