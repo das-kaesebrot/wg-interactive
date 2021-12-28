@@ -226,7 +226,7 @@ Source: {website}"""
                     gapFound = True
                     # break
             if not gapFound:
-                collectedAddresses.append(tempIPList[:-1])
+                collectedAddresses.append(tempIPList[-1])
                         
         
         for x in range(len(collectedAddresses)):
