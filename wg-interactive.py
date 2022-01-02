@@ -58,7 +58,7 @@ def main():
     
     banner = f"""{colored(f'wg-interactive.py v{version}', attrs=['bold'])}
 
-An interactive script for modifying and initializing WireGuard server configuration files and adding/deleting peers.
+An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers.
 by @{twitterhandle}
 Source: {website}"""
     
@@ -416,4 +416,8 @@ AllowedIPs = {selectedNetworks}
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nDetected keyboard interrupt. Aborting.")
+        sys.exit(1)
