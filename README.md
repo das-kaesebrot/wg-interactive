@@ -11,4 +11,4 @@ Launch `wg-interactive.py` as sudo. The tool will prompt for all options interac
 
 ## Configuration options
 #### Environment variables
-- `WGCONFPATH`: Path to look for WireGuard config files for. If not specified, defaults to `/etc/wireguard`
+- `WGCONFPATH`: Path to look for WireGuard config files in. If not specified, defaults to `/etc/wireguard`
