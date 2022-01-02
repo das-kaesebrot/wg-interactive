@@ -36,6 +36,10 @@ def getClientIPWithMaskFromPreviousPeers(wc, ipAddr):
     print(wc.peers.get(list(wc.peers.keys())[-1]))
     return ipaddress.ip_interface(str(ipAddr) + "/" + str(ipaddress.ip_interface(wc.peers.get(list(wc.peers.keys())[-1]).get('AllowedIPs')).netmask))
 
+def initNewInterface():
+    print("Sorry, this hasn't been implemented yet. Exiting.")
+    raise NotImplementedError
+
 def main():
     # Check if program is being run as root
     if not 'SUDO_UID' in os.environ.keys():
@@ -69,18 +73,31 @@ Source: {website}"""
     selection = 0
     validInput = False
     while not validInput:
-        print("Please select an interface to modify:")
+        print("Please select an interface to modify or initialize a new interface:")
         for x in range(len(wgList)):
             print("[%2d] %s" % (x, wgList[x]))
+        
+        initOp = {
+                'letter': 'i',
+                'text': 'Init new interface',
+                'short': 'init'
+            }
+        print("[%2c] %s" % (initOp.get('letter'), initOp.get('text')))
         selection = input(prompt)
         try:
-            selection = int(selection)
-            if (selection >= 0 ) and (selection < len(wgList)):
+            if selection == initOp.get('letter'):
                 validInput = True
             else:
-                cprint("Invalid input", 'red')
+                selection = int(selection)
+                if (selection >= 0 ) and (selection < len(wgList)):
+                    validInput = True
+                else:
+                    cprint("Invalid input", 'red')
         except ValueError:
-            cprint("Input needs to be a number", 'red')
+            cprint("Input needs to be a number or a single letter", 'red')
+    
+    if selection == 'i':
+        initNewInterface()
 
     selectedWGName = wgList[selection]
     absWGPath = getAbsWGPath(wgConfPath, selectedWGName, defaultExt)
@@ -357,10 +374,6 @@ AllowedIPs = {selectedNetworks}
         reloadWGInterfaceIfRunning(selectedWGName, wgConfPath)
         print("Done!")
         exit
-
-    elif selectedOperation.get('short') == 'init':
-        print("Sorry, this hasn't been implemented yet. Exiting.")
-        raise NotImplementedError
         
     
     elif selectedOperation.get('short') == 'delete':
