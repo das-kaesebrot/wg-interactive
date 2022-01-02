@@ -4,10 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-wgconfig = "*"
-termcolor = "*"
-netifaces = "*"
-validators = "*"
+wgconfig = "0.2.2"
+termcolor = "1.1.0"
+netifaces = "0.11.0"
+validators = "0.18.2"
 
 [dev-packages]
 pipinstall = "*"
