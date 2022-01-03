@@ -7,7 +7,7 @@
 - Or: a python virtualenv with packages from `Pipfile`
 
 ## Usage
-Launch `wg-interactive.py` as sudo. The tool will prompt for all options interactively.
+Launch `wg-interactive.py` as root. The tool will prompt for all options interactively.
 
 ## Configuration options
 #### Environment variables
