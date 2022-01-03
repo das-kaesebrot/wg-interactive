@@ -174,8 +174,8 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     peerName = input(prompt)
 
     # Create peers dir if it doesn't exist yet
-    os.makedirs(peersDir, mode=644, exist_ok=True)
-    peerFilePath = Path(peersDir, peerName + defaultExt)
+    os.makedirs(Path(peersDir,selectedWGName), mode=644, exist_ok=True)
+    peerFilePath = Path(peersDir, selectedWGName, peerName + defaultExt)
     print(f"Peer file will be written to: {colored(peerFilePath, attrs=['bold'])}\n")
     collectedAddresses = []
     recommendedAddresses = []
@@ -326,9 +326,9 @@ AllowedIPs = {selectedNetworks}
     wc.add_attr(publicKey, 'AllowedIPs', str(clientIPWithNetmaskForConfig))
     wc.write_file(absWGPath)
     
-    with open(os.path.join(peersDir, f"{selectedWGName}-{peerName}{defaultExt}"), 'w') as peerfile:
+    with open(peerFilePath, 'w') as peerfile:
         peerfile.write(peerConfig)
-        print(f"Wrote peer config to {colored(f'{peersDir}/{selectedWGName}-{peerName}{defaultExt}', attrs=['bold'])}")
+        print(f"Wrote peer config to {colored(f'{peerFilePath}', attrs=['bold'])}")
     
     reloadWGInterfaceIfRunning(selectedWGName, wgConfPath)
     print("Done!")
