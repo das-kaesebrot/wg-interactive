@@ -5,6 +5,7 @@ import wgconfig
 import ipaddress
 import netifaces
 import validators
+import qrcode
 from typing import OrderedDict
 from wgconfig import wgexec
 from termcolor import colored, cprint
@@ -34,6 +35,11 @@ def getAbsWGPath (wgConfPath, selectedWGName, defaultExt):
 
 def getClientIPWithMaskFromPreviousPeers(wc, ipAddr):
     return ipaddress.ip_interface(str(ipAddr) + "/" + str(ipaddress.ip_interface(wc.peers.get(list(wc.peers.keys())[-1]).get('AllowedIPs')).netmask))
+
+
+def generateQRCodeFromConfigAndSave(config, peerQRCodeFile):
+    qrcode.make(data=config).save(peerQRCodeFile)
+    print(f"Wrote peer QR code to {colored(f'{peerQRCodeFile}', attrs=['bold'])}")
 
 
 def initNewInterface():
@@ -176,7 +182,9 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     # Create peers dir if it doesn't exist yet
     os.makedirs(Path(peersDir,selectedWGName), mode=644, exist_ok=True)
     peerFilePath = Path(peersDir, selectedWGName, peerName + defaultExt)
+    peerQRCodePath = Path(peersDir, selectedWGName, peerName + "-qr.png")
     print(f"Peer file will be written to: {colored(peerFilePath, attrs=['bold'])}\n")
+    print(f"Peer QR code will be written to: {colored(peerQRCodePath, attrs=['bold'])}\n")
     collectedAddresses = []
     recommendedAddresses = []
     if wc.peers == {}:
@@ -329,6 +337,8 @@ AllowedIPs = {selectedNetworks}
     with open(peerFilePath, 'w') as peerfile:
         peerfile.write(peerConfig)
         print(f"Wrote peer config to {colored(f'{peerFilePath}', attrs=['bold'])}")
+    
+    generateQRCodeFromConfigAndSave(peerConfig, peerQRCodePath)
     
     reloadWGInterfaceIfRunning(selectedWGName, wgConfPath)
     print("Done!")
