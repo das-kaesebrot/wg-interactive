@@ -33,12 +33,307 @@ def getAbsWGPath (wgConfPath, selectedWGName, defaultExt):
 
 
 def getClientIPWithMaskFromPreviousPeers(wc, ipAddr):
-    print(wc.peers.get(list(wc.peers.keys())[-1]))
     return ipaddress.ip_interface(str(ipAddr) + "/" + str(ipaddress.ip_interface(wc.peers.get(list(wc.peers.keys())[-1]).get('AllowedIPs')).netmask))
+
 
 def initNewInterface():
     print("Sorry, this hasn't been implemented yet. Exiting.")
     raise NotImplementedError
+
+
+def deletePeerFromInterface(wc, selectedWGName, absWGPath):
+    if wc.peers == {}:
+        sys.stderr.write('No peers found in config. Exiting.\n')
+        sys.exit(1)
+
+    peersByName = OrderedDict({})
+    for peerKey in wc.peers.keys():
+        peer = wc.peers.get(peerKey)
+        publicKey = peer.get('PublicKey')
+        for entry in peer.get('_rawdata'):
+            if entry.startswith('#'):
+                name = entry[2:]
+                if not publicKey in peersByName.keys():
+                    peersByName[publicKey] = {
+                        'Name': name,
+                    }
+
+    selection = 0
+    validInput = False
+
+    peersByNameAsList = []
+    for key in peersByName.keys():
+        peersByNameAsList.append({
+            'PublicKey': key,
+            'Name': peersByName.get(key).get('Name')
+            })
+    
+    while not validInput:
+        print("Please select a peer to delete:")
+        for x in range(len(peersByNameAsList)):
+            print("[%2d] PublicKey: %s (%s)" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('Name')))
+        selection = input(prompt)
+        
+        try:
+            selection = int(selection)
+            if (selection >= 0 ) and (selection < len(peersByNameAsList)):
+                validInput = True
+                peerToBeDeleted = peersByNameAsList[selection]
+                wc.del_peer(peerToBeDeleted.get('PublicKey'))
+                wc.write_file(absWGPath)
+                print(f"Deleted peer {colored(peerToBeDeleted.get('PublicKey') + ' (' + peerToBeDeleted.get('Name') + ')', attrs=['bold'])}")
+                
+                reloadWGInterfaceIfRunning(selectedWGName, absWGPath)
+                
+                print("Done!")
+                exit
+            else:
+                cprint("Invalid input", 'red')
+        except ValueError:
+            cprint("Input needs to be a number", 'red')
+
+
+def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
+    listenPorts = [int(wc.interface.get('ListenPort'))]
+
+    recommendedEndpoints = []
+    for iface in netifaces.interfaces():
+        addrs = netifaces.ifaddresses(iface)
+        if netifaces.AF_INET in addrs.keys():
+            for addr in addrs[netifaces.AF_INET]:
+                if ipaddress.ip_address(addr.get('addr')).is_global:
+                    recommendedEndpoints.append(addr.get('addr'))
+        if netifaces.AF_INET6 in addrs.keys():
+            for addr in addrs[netifaces.AF_INET6]:
+                if ipaddress.ip_address(addr.get('addr')).is_global:
+                    recommendedEndpoints.append(addr.get('addr'))
+
+    if '.' in os.uname()[0]:
+        recommendedEndpoints.append(os.uname()[1])
+
+    selection = 0
+    validInput = False
+    while not validInput:
+        print(f"{colored('Endpoint port', attrs=['bold'])}\nPlease select an endpoint port to use or input your own:")
+        for x in range(len(listenPorts)):
+            print("[%2d] %s" % (x, listenPorts[x]))
+
+        selection = input(prompt)
+        inputIsNotPort = False
+        try:
+            try:
+                selection = int(selection)
+                if (selection >= 0 ) and (selection < len(listenPorts)):
+                    selectedListenPort = listenPorts[selection]
+                    validInput = True
+                    inputIsNotPort = True
+            except:
+                pass
+            if not inputIsNotPort:                    
+                selection = int(selection)
+                if (selection >= 1) and (selection <= 65535):
+                    selectedListenPort = selection
+                    validInput = True
+                else:
+                    cprint("Invalid input", 'red')
+        except ValueError:
+            cprint("Input needs to be a valid port number", 'red')
+
+    selection = 0
+    validInput = False
+    while not validInput:
+        print(f"{colored('Endpoint host', attrs=['bold'])}\nPlease select an endpoint host to use or input your own:")
+        for x in range(len(recommendedEndpoints)):
+            print("[%2d] %s" % (x, recommendedEndpoints[x]))
+
+        selection = input(prompt)
+        inputIsDomainOrIP = False
+        try:
+            try:
+                if not validators.domain(selection):
+                    raise ValueError
+                selectedAddr = str(selection)
+                validInput = True
+                inputIsDomainOrIP = True
+            except:
+                pass
+            if not inputIsDomainOrIP:
+                selection = int(selection)
+                if (selection >= 0 ) and (selection < len(recommendedEndpoints)):
+                    selectedAddr = recommendedEndpoints[selection]
+                    validInput = True
+                else:
+                    cprint("Invalid input", 'red')                    
+        except ValueError:
+            cprint("Input needs to be a number or an IP without a subnet range", 'red')
+
+    endpoint = selectedAddr + ':' + str(selectedListenPort)
+    print(f"Selected endpoint: {colored(endpoint, attrs=['bold'])}\n")
+
+    print("Please input the peer\'s name:")
+    peerName = input(prompt)
+
+    # Create peers dir if it doesn't exist yet
+    os.makedirs(peersDir, mode=644, exist_ok=True)
+    peerFilePath = Path(peersDir, peerName + defaultExt)
+    print(f"Peer file will be written to: {colored(peerFilePath, attrs=['bold'])}\n")
+    collectedAddresses = []
+    recommendedAddresses = []
+    if wc.peers == {}:
+        addrRange = wc.interface.get('Address')
+        if type(addrRange) == list:
+            for ipIface in addrRange:
+                collectedAddresses.append(ipaddress.ip_interface(ipIface))
+        else:
+            collectedAddresses.append(ipaddress.ip_interface(addrRange))
+    else:
+        
+        tempIPList = []
+        for peer in wc.peers:
+            allowedIPsFromPeer = wc.peers.get(peer).get('AllowedIPs')
+            if type(allowedIPsFromPeer) == list:
+                for allowedIPEntry in allowedIPsFromPeer:
+                    tempIPList.append(ipaddress.ip_interface(allowedIPEntry))
+            else:
+                tempIPList.append(ipaddress.ip_interface(allowedIPsFromPeer))
+            tempIPList.sort()
+        
+        gapFound = False
+        for x in range(len(tempIPList)):
+            # check if gap between IPs is bigger than 1 to help fill gaps
+            # allows finding multiple gaps
+            if x != 0 and not (tempIPList[x] - 1 == tempIPList[x-1]):
+                collectedAddresses.append(tempIPList[x-1])
+                gapFound = True
+        if not gapFound:
+            collectedAddresses.append(tempIPList[-1])
+                    
+    
+    for x in range(len(collectedAddresses)):
+        addr = collectedAddresses[x]        
+        addr = ipaddress.ip_interface(addr + 1)
+        if not (
+                addr.is_reserved
+            or addr.is_multicast
+            or addr.is_link_local
+            or addr.is_loopback
+        ):
+            recommendedAddresses.append(addr.ip)
+    
+    
+    selection = 0
+    validInput = False
+    while not validInput:
+        print(f"{colored('Peer IP', attrs=['bold'])}\nPlease select a recommended address or input your own:")
+        for x in range(len(recommendedAddresses)):
+            print("[%2d] %s" % (x, recommendedAddresses[x]))
+            
+        selection = input(prompt)
+        inputIsIP = False
+        try:
+            try:
+                peerIP = ipaddress.ip_address(selection)
+                validInput = True
+                inputIsIP = True
+            except:
+                pass
+            if not inputIsIP:
+                selection = int(selection)
+                if (selection >= 0 ) and (selection < len(recommendedAddresses)):
+                    peerIP = recommendedAddresses[selection]
+                    validInput = True
+                else:
+                    cprint("Invalid input", 'red')                    
+        except ValueError:
+            cprint("Input needs to be a number or an IP without a subnet range", 'red')
+    
+    print(f"Selected peer IP: {colored(str(peerIP), attrs=['bold'])}\n")
+
+    # Guessing the AllowedIPs from the interface subnet mask and the selected peer IP
+    clientAllowedIPs = [ipaddress.ip_interface(str(peerIP) +  "/" + str(ipaddress.ip_interface(wc.interface.get('Address')).netmask)).network]
+
+    selection = 0
+    validInput = False
+    while not validInput:
+        print(f"{colored('AllowedIPs (Peer config)', attrs=['bold'])}\nPlease select a range of AllowedIPs or give your own (comma-separated for multiple ranges, no spaces):")
+        for x in range(len(clientAllowedIPs)):
+            print("[%2d] %s" % (x, clientAllowedIPs[x]))
+            
+        selection = input(prompt)
+        inputIsNet = False
+        try:
+            try:
+                if ',' in selection:
+                    selectionList = selection.split(',')
+                    for ipNet in selectionList:
+                        selectedNetworks = []
+                        selectedNetworks.append(ipaddress.ip_network(ipNet))
+                else:
+                    selectedNetworks = ipaddress.ip_network(ipNet)
+                validInput, inputIsNet = True, True
+            except:
+                pass
+            if not inputIsNet:
+                selection = int(selection)
+                if (selection >= 0 ) and (selection < len(clientAllowedIPs)):
+                    selectedNetworks = clientAllowedIPs[selection]
+                    validInput = True
+                else:
+                    cprint("Invalid input", 'red')
+        except ValueError:
+            cprint("Input needs to be a number or an IP network", 'red')
+    
+    print(f"Selected AllowedIPs (Peer config): {colored(selectedNetworks, attrs=['bold'])}\n")
+
+    persistentKeepalive = True
+
+    selection = 0
+    validInput = False
+    while not validInput:
+        selection = input(f"Add 'PersistentKeepalive = 25' to client config? [Y/n] {prompt}")
+
+        try:
+            if not selection == '':
+                selection = selection.lower()
+                if selection == 'y':
+                    validInput = True
+                elif selection == 'n':
+                    persistentKeepalive = False
+                    validInput = True
+                else:
+                    cprint("Invalid input", 'red')
+            else:
+                validInput = True
+        except ValueError:
+            cprint("Input needs to be either y or n", 'red')
+
+
+    privateKey, publicKey = wgexec.generate_keypair()
+
+    clientIPWithNetmaskForConfig = getClientIPWithMaskFromPreviousPeers(wc, peerIP)
+
+    peerConfig = f"""[Interface]
+Address = {clientIPWithNetmaskForConfig}
+PrivateKey = {privateKey}
+
+[Peer]
+PublicKey = {wgexec.get_publickey(wc.interface.get('PrivateKey'))}
+Endpoint = {endpoint}
+AllowedIPs = {selectedNetworks}
+{"PersistentKeepalive = 25" if persistentKeepalive else ""}\n"""
+
+    wc.add_peer(publicKey, f"# {peerName}")
+    wc.add_attr(publicKey, 'AllowedIPs', str(clientIPWithNetmaskForConfig))
+    wc.write_file(absWGPath)
+    
+    with open(os.path.join(peersDir, f"{selectedWGName}-{peerName}{defaultExt}"), 'w') as peerfile:
+        peerfile.write(peerConfig)
+        print(f"Wrote peer config to {colored(f'{peersDir}/{selectedWGName}-{peerName}{defaultExt}', attrs=['bold'])}")
+    
+    reloadWGInterfaceIfRunning(selectedWGName, wgConfPath)
+    print("Done!")
+    exit
+
 
 def main():
     # Check if program is being run as root
@@ -49,6 +344,10 @@ def main():
     # Static vars
     if os.getenv("WGCONFPATH"): wgConfPath = Path(os.getenv("WGCONFPATH"))
     else: wgConfPath = Path("/etc/wireguard")    
+    
+    global prompt
+    global defaultExt
+    global peersDir
     
     defaultExt = '.conf'
     prompt = "> "
@@ -87,6 +386,7 @@ Source: {website}"""
         try:
             if selection == initOp.get('letter'):
                 validInput = True
+                
             else:
                 selection = int(selection)
                 if (selection >= 0 ) and (selection < len(wgList)):
@@ -136,300 +436,8 @@ Source: {website}"""
     
     print(f"Selected operation: {colored(selectedOperation.get('short'), attrs=['bold'])}\n")
 
-    if selectedOperation.get('short') == "add":
-
-        listenPorts = [int(wc.interface.get('ListenPort'))]
-
-        recommendedEndpoints = []
-        for iface in netifaces.interfaces():
-            addrs = netifaces.ifaddresses(iface)
-            if netifaces.AF_INET in addrs.keys():
-                for addr in addrs[netifaces.AF_INET]:
-                    if ipaddress.ip_address(addr.get('addr')).is_global:
-                        recommendedEndpoints.append(addr.get('addr'))
-            if netifaces.AF_INET6 in addrs.keys():
-                for addr in addrs[netifaces.AF_INET6]:
-                    if ipaddress.ip_address(addr.get('addr')).is_global:
-                        recommendedEndpoints.append(addr.get('addr'))
-
-        if '.' in os.uname()[0]:
-            recommendedEndpoints.append(os.uname()[1])
-
-        selection = 0
-        validInput = False
-        while not validInput:
-            print(f"{colored('Endpoint port', attrs=['bold'])}\nPlease select an endpoint port to use or input your own:")
-            for x in range(len(listenPorts)):
-                print("[%2d] %s" % (x, listenPorts[x]))
-
-            selection = input(prompt)
-            inputIsNotPort = False
-            try:
-                try:
-                    selection = int(selection)
-                    if (selection >= 0 ) and (selection < len(listenPorts)):
-                        selectedListenPort = listenPorts[selection]
-                        validInput = True
-                        inputIsNotPort = True
-                except:
-                    pass
-                if not inputIsNotPort:                    
-                    selection = int(selection)
-                    if (selection >= 1) and (selection <= 65535):
-                        selectedListenPort = selection
-                        validInput = True
-                    else:
-                        cprint("Invalid input", 'red')
-            except ValueError:
-                cprint("Input needs to be a valid port number", 'red')
-
-        selection = 0
-        validInput = False
-        while not validInput:
-            print(f"{colored('Endpoint host', attrs=['bold'])}\nPlease select an endpoint host to use or input your own:")
-            for x in range(len(recommendedEndpoints)):
-                print("[%2d] %s" % (x, recommendedEndpoints[x]))
-
-            selection = input(prompt)
-            inputIsDomainOrIP = False
-            try:
-                try:
-                    if not validators.domain(selection):
-                        raise ValueError
-                    selectedAddr = str(selection)
-                    validInput = True
-                    inputIsDomainOrIP = True
-                except:
-                    pass
-                if not inputIsDomainOrIP:
-                    selection = int(selection)
-                    if (selection >= 0 ) and (selection < len(recommendedEndpoints)):
-                        selectedAddr = recommendedEndpoints[selection]
-                        validInput = True
-                    else:
-                        cprint("Invalid input", 'red')                    
-            except ValueError:
-                cprint("Input needs to be a number or an IP without a subnet range", 'red')
-
-        endpoint = selectedAddr + ':' + str(selectedListenPort)
-        print(f"Selected endpoint: {colored(endpoint, attrs=['bold'])}\n")
-
-        print("Please input the peer\'s name:")
-        peerName = input(prompt)
-
-        # Create peers dir if it doesn't exist yet
-        os.makedirs(peersDir, mode=644, exist_ok=True)
-        peerFilePath = Path(peersDir, peerName + defaultExt)
-        print(f"Peer file will be written to: {colored(peerFilePath, attrs=['bold'])}\n")
-        collectedAddresses = []
-        recommendedAddresses = []
-        if wc.peers == {}:
-            addrRange = wc.interface.get('Address')
-            if type(addrRange) == list:
-                for ipIface in addrRange:
-                    collectedAddresses.append(ipaddress.ip_interface(ipIface))
-            else:
-                collectedAddresses.append(ipaddress.ip_interface(addrRange))
-        else:
-
-            tempIPList = []
-            for peer in wc.peers:
-            allowedIPsFromPeer = wc.peers.get(peer).get('AllowedIPs')
-            if type(allowedIPsFromPeer) == list:
-                for allowedIPEntry in allowedIPsFromPeer:
-                    tempIPList.append(ipaddress.ip_interface(allowedIPEntry))
-            else:
-                tempIPList.append(ipaddress.ip_interface(allowedIPsFromPeer))
-                tempIPList.sort()
-            
-            gapFound = False
-            for x in range(len(tempIPList)):
-                # check if gap between IPs is bigger than 1 to help fill gaps
-                # allows finding multiple gaps
-                if x != 0 and not (tempIPList[x] - 1 == tempIPList[x-1]):
-                    collectedAddresses.append(tempIPList[x-1])
-                    gapFound = True
-                    # break
-            if not gapFound:
-                collectedAddresses.append(tempIPList[-1])
-                        
-        
-        for x in range(len(collectedAddresses)):
-            addr = collectedAddresses[x]        
-            addr = ipaddress.ip_interface(addr + 1)
-            if not (
-                    addr.is_reserved
-                or addr.is_multicast
-                or addr.is_link_local
-                or addr.is_loopback
-            ):
-                recommendedAddresses.append(addr.ip)
-        
-        
-        selection = 0
-        validInput = False
-        while not validInput:
-            print(f"{colored('Peer IP', attrs=['bold'])}\nPlease select a recommended address or input your own:")
-            for x in range(len(recommendedAddresses)):
-                print("[%2d] %s" % (x, recommendedAddresses[x]))
-                
-            selection = input(prompt)
-            inputIsIP = False
-            try:
-                try:
-                    peerIP = ipaddress.ip_address(selection)
-                    validInput = True
-                    inputIsIP = True
-                except:
-                    pass
-                if not inputIsIP:
-                    selection = int(selection)
-                    if (selection >= 0 ) and (selection < len(recommendedAddresses)):
-                        peerIP = recommendedAddresses[selection]
-                        validInput = True
-                    else:
-                        cprint("Invalid input", 'red')                    
-            except ValueError:
-                cprint("Input needs to be a number or an IP without a subnet range", 'red')
-        
-        print(f"Selected peer IP: {colored(str(peerIP), attrs=['bold'])}\n")
-
-        # Guessing the AllowedIPs from the interface subnet mask and the selected peer IP
-        clientAllowedIPs = [ipaddress.ip_interface(str(peerIP) +  "/" + str(ipaddress.ip_interface(wc.interface.get('Address')).netmask)).network]
-
-        selection = 0
-        validInput = False
-        while not validInput:
-            print(f"{colored('AllowedIPs (Peer config)', attrs=['bold'])}\nPlease select a range of AllowedIPs or give your own (comma-separated for multiple ranges, no spaces):")
-            for x in range(len(clientAllowedIPs)):
-                print("[%2d] %s" % (x, clientAllowedIPs[x]))
-                
-            selection = input(prompt)
-            inputIsNet = False
-            try:
-                try:
-                    if ',' in selection:
-                        selectionList = selection.split(',')
-                        for ipNet in selectionList:
-                            selectedNetworks = []
-                            selectedNetworks.append(ipaddress.ip_network(ipNet))
-                    else:
-                        selectedNetworks = ipaddress.ip_network(ipNet)
-                    validInput, inputIsNet = True, True
-                except:
-                    pass
-                if not inputIsNet:
-                    selection = int(selection)
-                    if (selection >= 0 ) and (selection < len(clientAllowedIPs)):
-                        selectedNetworks = clientAllowedIPs[selection]
-                        validInput = True
-                    else:
-                        cprint("Invalid input", 'red')
-            except ValueError:
-                cprint("Input needs to be a number or an IP network", 'red')
-        
-        print(f"Selected AllowedIPs (Peer config): {colored(selectedNetworks, attrs=['bold'])}\n")
-
-        persistentKeepalive = True
-
-        selection = 0
-        validInput = False
-        while not validInput:
-            selection = input(f"Add 'PersistentKeepalive = 25' to client config? [Y/n] {prompt}")
-
-            try:
-                if not selection == '':
-                    selection = selection.lower()
-                    if selection == 'y':
-                        validInput = True
-                    elif selection == 'n':
-                        persistentKeepalive = False
-                        validInput = True
-                    else:
-                        cprint("Invalid input", 'red')
-                else:
-                    validInput = True
-            except ValueError:
-                cprint("Input needs to be either y or n", 'red')
-
-
-        privateKey, publicKey = wgexec.generate_keypair()
-
-        clientIPWithNetmaskForConfig = getClientIPWithMaskFromPreviousPeers(wc, peerIP)
-
-        peerConfig = f"""[Interface]
-Address = {clientIPWithNetmaskForConfig}
-PrivateKey = {privateKey}
-
-[Peer]
-PublicKey = {wgexec.get_publickey(wc.interface.get('PrivateKey'))}
-Endpoint = {endpoint}
-AllowedIPs = {selectedNetworks}
-{"PersistentKeepalive = 25" if persistentKeepalive else ""}\n"""
-
-        wc.add_peer(publicKey, f"# {peerName}")
-        wc.add_attr(publicKey, 'AllowedIPs', str(clientIPWithNetmaskForConfig))
-        wc.write_file(absWGPath)
-        
-        with open(os.path.join(peersDir, f"{selectedWGName}-{peerName}{defaultExt}"), 'w') as peerfile:
-            peerfile.write(peerConfig)
-            print(f"Wrote peer config to {colored(f'{peersDir}/{selectedWGName}-{peerName}{defaultExt}', attrs=['bold'])}")
-        
-        reloadWGInterfaceIfRunning(selectedWGName, wgConfPath)
-        print("Done!")
-        exit
-        
-    
-    elif selectedOperation.get('short') == 'delete':
-        if wc.peers == {}:
-            sys.stderr.write('No peers found in config. Exiting.\n')
-            sys.exit(1)
-
-        peersByName = OrderedDict({})
-        for peerKey in wc.peers.keys():
-            peer = wc.peers.get(peerKey)
-            publicKey = peer.get('PublicKey')
-            for entry in peer.get('_rawdata'):
-                if entry.startswith('#'):
-                    name = entry[2:]
-                    if not publicKey in peersByName.keys():
-                        peersByName[publicKey] = {
-                            'Name': name,
-                        }
-
-        selection = 0
-        validInput = False
-
-        peersByNameAsList = []
-        for key in peersByName.keys():
-            peersByNameAsList.append({
-                'PublicKey': key,
-                'Name': peersByName.get(key).get('Name')
-                })
-        
-        while not validInput:
-            print("Please select a peer to delete:")
-            for x in range(len(peersByNameAsList)):
-                print("[%2d] PublicKey: %s (%s)" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('Name')))
-            selection = input(prompt)
-            
-            try:
-                selection = int(selection)
-                if (selection >= 0 ) and (selection < len(peersByNameAsList)):
-                    validInput = True
-                    peerToBeDeleted = peersByNameAsList[selection]
-                    wc.del_peer(peerToBeDeleted.get('PublicKey'))
-                    wc.write_file(absWGPath)
-                    print(f"Deleted peer {colored(peerToBeDeleted.get('PublicKey') + ' (' + peerToBeDeleted.get('Name') + ')', attrs=['bold'])}")
-                    
-                    reloadWGInterfaceIfRunning(selectedWGName, absWGPath)
-                    
-                    print("Done!")
-                    exit
-                else:
-                    cprint("Invalid input", 'red')
-            except ValueError:
-                cprint("Input needs to be a number", 'red')
+    if selectedOperation.get('short') == "add": addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath)
+    elif selectedOperation.get('short') == 'delete': deletePeerFromInterface(wc, selectedWGName, absWGPath)
 
 
 if __name__ == "__main__":
