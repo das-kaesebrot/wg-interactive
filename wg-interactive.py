@@ -232,10 +232,14 @@ Source: {website}"""
                 collectedAddresses.append(ipaddress.ip_interface(addrRange))
         else:
 
-            # TODO implement support for multiple values in AllowedIPs coming from existing config
             tempIPList = []
             for peer in wc.peers:
-                tempIPList.append(ipaddress.ip_interface(wc.peers.get(peer).get('AllowedIPs')))
+            allowedIPsFromPeer = wc.peers.get(peer).get('AllowedIPs')
+            if type(allowedIPsFromPeer) == list:
+                for allowedIPEntry in allowedIPsFromPeer:
+                    tempIPList.append(ipaddress.ip_interface(allowedIPEntry))
+            else:
+                tempIPList.append(ipaddress.ip_interface(allowedIPsFromPeer))
                 tempIPList.sort()
             
             gapFound = False
