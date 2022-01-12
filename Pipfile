@@ -13,4 +13,4 @@ validators = "==0.18.2"
 pyinstaller = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.7"
