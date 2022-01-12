@@ -102,7 +102,6 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     for iface in netifaces.interfaces():
         addrs = netifaces.ifaddresses(iface)
         if netifaces.AF_INET in addrs.keys():
-            print(f"netifaces.AF_INET {netifaces.AF_INET}")
             for addr in addrs[netifaces.AF_INET]:
                 addrGet = addr.get('addr')
                 # work around bug from the netifaces library which sometimes appends the interface name to an IP
