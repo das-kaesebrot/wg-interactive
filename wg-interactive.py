@@ -152,7 +152,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     selection = 0
     validInput = False
     while not validInput:
-        print(f"{colored('Endpoint host', attrs=['bold'])}\nPlease select an endpoint host to use or input your own:")
+        print(f"{colored('Endpoint host', attrs=['bold'])}\nSince it is not required for a WireGuard server to read its own endpoint domain/IP from the config file, this script needs to provide that value.\nPlease select an endpoint host (this server's IP or a FQDN pointing to it) to use in the peer's config file or input your own.\nExamples for valid own inputs:\nvpn.example.com\n11.22.33.44\nPlease don't append the port, this will be done automatically!")
         for x in range(len(recommendedEndpoints)):
             print("[%2d] %s" % (x, recommendedEndpoints[x]))
 
@@ -255,7 +255,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
                 else:
                     cprint("Invalid input", 'red')                    
         except ValueError:
-            cprint("Input needs to be a number or an IP without a subnet range", 'red')
+            cprint("Input needs to be a either a domain, a number or an IP without a subnet range", 'red')
     
     print(f"Selected peer IP: {colored(str(peerIP), attrs=['bold'])}\n")
 
@@ -265,7 +265,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     selection = 0
     validInput = False
     while not validInput:
-        print(f"{colored('AllowedIPs (Peer config)', attrs=['bold'])}\nPlease select a range of AllowedIPs or give your own (comma-separated for multiple ranges, no spaces):")
+        print(f"{colored('AllowedIPs', attrs=['bold'])}\nFor the peer sided config, as in which network ranges the peer is allowed to access.\nBe aware that a user may change this in their config at any time.\nPlease select a range of AllowedIPs or give your own (comma-separated for multiple ranges, no spaces):")
         for x in range(len(clientAllowedIPs)):
             print("[%2d] %s" % (x, clientAllowedIPs[x]))
             
