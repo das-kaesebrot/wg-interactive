@@ -102,13 +102,22 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     for iface in netifaces.interfaces():
         addrs = netifaces.ifaddresses(iface)
         if netifaces.AF_INET in addrs.keys():
+            print(f"netifaces.AF_INET {netifaces.AF_INET}")
             for addr in addrs[netifaces.AF_INET]:
-                if ipaddress.ip_address(addr.get('addr')).is_global:
-                    recommendedEndpoints.append(addr.get('addr'))
+                addrGet = addr.get('addr')
+                # work around bug from the netifaces library which sometimes appends the interface name to an IP
+                if '%' in addrGet:
+                    addrGet = addrGet.split('%')[0]
+                if ipaddress.ip_address(addrGet).is_global:
+                    recommendedEndpoints.append(addrGet)
         if netifaces.AF_INET6 in addrs.keys():
             for addr in addrs[netifaces.AF_INET6]:
-                if ipaddress.ip_address(addr.get('addr')).is_global:
-                    recommendedEndpoints.append(addr.get('addr'))
+                addrGet = addr.get('addr')
+                # work around bug from the netifaces library which sometimes appends the interface name to an IP
+                if '%' in addrGet:
+                    addrGet = addrGet.split('%')[0]
+                if ipaddress.ip_address(addrGet).is_global:
+                    recommendedEndpoints.append(addrGet)
 
     if '.' in os.uname()[0]:
         recommendedEndpoints.append(os.uname()[1])
@@ -384,7 +393,7 @@ def main():
 
     wgList = []
     
-    version = "0.2.1-alpha"
+    version = "0.2.2-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
