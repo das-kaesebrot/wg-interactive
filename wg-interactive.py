@@ -344,6 +344,32 @@ AllowedIPs = {selectedNetworks}
     reloadWGInterfaceIfRunning(selectedWGName, wgConfPath)
     print("Done!")
     sys.exit()
+    
+
+def listPeersFromInterface(wc, selectedWGName):
+    peersByName = OrderedDict({})
+    for peerKey in wc.peers.keys():
+        peer = wc.peers.get(peerKey)
+        publicKey = peer.get('PublicKey')
+        for entry in peer.get('_rawdata'):
+            if entry.startswith('#'):
+                name = entry[2:]
+                if not publicKey in peersByName.keys():
+                    peersByName[publicKey] = {
+                        'Name': name,
+                    }
+
+    peersByNameAsList = []
+    for key in peersByName.keys():
+        peersByNameAsList.append({
+            'PublicKey': key,
+            'Name': peersByName.get(key).get('Name')
+            })
+    
+    print(f"Peers in WireGuard interface {colored(selectedWGName, attrs=['bold'])}:")
+    for x in range(len(peersByNameAsList)):
+        print("[%2d] PublicKey: %s (%s)" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('Name')))
+    print("")
 
 
 def main():
@@ -428,7 +454,12 @@ Source: {website}"""
                 'letter': 'a',
                 'text': 'Add peer',
                 'short': 'add'
-            }, 
+            },
+            {
+                'letter': 'l',
+                'text': 'List all peers and return to this menu',
+                'short': 'list'
+            },
             {
                 'letter': 'd',
                 'text': 'Delete peer',
@@ -443,6 +474,10 @@ Source: {website}"""
                 validInput = True
         if not validInput:
             cprint("Invalid input", 'red')
+        elif validInput and selectedOperation.get('short') == 'list':
+            print(f"Selected operation: {colored(selectedOperation.get('short'), attrs=['bold'])}\n")
+            listPeersFromInterface(wc, selectedWGName)
+            validInput = False
 
     
     print(f"Selected operation: {colored(selectedOperation.get('short'), attrs=['bold'])}\n")
