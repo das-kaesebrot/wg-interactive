@@ -93,7 +93,7 @@ def deletePeerFromInterface(wc, selectedWGName, absWGPath):
                 reloadWGInterfaceIfRunning(selectedWGName, absWGPath)
                 
                 print("Done!")
-                exit
+                sys.exit()
             else:
                 cprint("Invalid input", 'red')
         except ValueError:
@@ -343,7 +343,7 @@ AllowedIPs = {selectedNetworks}
     
     reloadWGInterfaceIfRunning(selectedWGName, wgConfPath)
     print("Done!")
-    exit
+    sys.exit()
 
 
 def main():
