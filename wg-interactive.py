@@ -54,10 +54,12 @@ def deletePeerFromInterface(wc, selectedWGName, absWGPath):
         for entry in peer.get('_rawdata'):
             if entry.startswith('#'):
                 name = entry[2:]
-                if not publicKey in peersByName.keys():
-                    peersByName[publicKey] = {
-                        'Name': name,
-                    }
+            else:
+                name = 'Unnamed Peer'
+            if not publicKey in peersByName.keys():
+                peersByName[publicKey] = {
+                    'Name': name,
+                }
 
     selection = 0
     validInput = False
@@ -343,11 +345,13 @@ def listPeersFromInterface(wc, selectedWGName):
         publicKey = peer.get('PublicKey')
         for entry in peer.get('_rawdata'):
             if entry.startswith('#'):
-                name = entry[2:]
-                if not publicKey in peersByName.keys():
-                    peersByName[publicKey] = {
-                        'Name': name,
-                    }
+                name = entry[2:]                    
+            else:
+                name = 'Unnamed Peer'
+            if not publicKey in peersByName.keys():
+                peersByName[publicKey] = {
+                    'Name': name,
+                }
 
     peersByNameAsList = []
     for key in peersByName.keys():
@@ -382,7 +386,7 @@ def main():
 
     wgList = []
     
-    version = "0.2.0-alpha"
+    version = "0.2.1-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
