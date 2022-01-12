@@ -492,3 +492,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nDetected keyboard interrupt. Aborting.")
         sys.exit(1)
+    except EOFError:
+        print("\nDetected EOF. Aborting.")
+        sys.exit(1)
