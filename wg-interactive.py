@@ -49,17 +49,16 @@ def deletePeerFromInterface(wc, selectedWGName, absWGPath):
 
     peersByName = OrderedDict({})
     for peerKey in wc.peers.keys():
+        name = 'Unnamed Peer'
         peer = wc.peers.get(peerKey)
         publicKey = peer.get('PublicKey')
         for entry in peer.get('_rawdata'):
             if entry.startswith('#'):
-                name = entry[2:]
-            else:
-                name = 'Unnamed Peer'
-            if not publicKey in peersByName.keys():
-                peersByName[publicKey] = {
-                    'Name': name,
-                }
+                name = entry[2:]        
+        if not publicKey in peersByName.keys():
+            peersByName[publicKey] = {
+                'Name': name,
+            }
 
     selection = 0
     validInput = False
@@ -341,17 +340,16 @@ AllowedIPs = {selectedNetworks}
 def listPeersFromInterface(wc, selectedWGName):
     peersByName = OrderedDict({})
     for peerKey in wc.peers.keys():
+        name = 'Unnamed Peer'
         peer = wc.peers.get(peerKey)
         publicKey = peer.get('PublicKey')
         for entry in peer.get('_rawdata'):
             if entry.startswith('#'):
-                name = entry[2:]                    
-            else:
-                name = 'Unnamed Peer'
-            if not publicKey in peersByName.keys():
-                peersByName[publicKey] = {
-                    'Name': name,
-                }
+                name = entry[2:]        
+        if not publicKey in peersByName.keys():
+            peersByName[publicKey] = {
+                'Name': name,
+            }
 
     peersByNameAsList = []
     for key in peersByName.keys():
