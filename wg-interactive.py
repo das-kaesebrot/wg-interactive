@@ -42,6 +42,7 @@ def generateQRCodeFromConfigAndSave(config, peerQRCodeFile):
     print(f"Wrote peer QR code to {colored(f'{peerQRCodeFile}', attrs=['bold'])}")
 
 
+# TODO add init function
 def initNewInterface():
     print("Sorry, this hasn't been implemented yet. Exiting.")
     raise NotImplementedError
@@ -180,7 +181,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     peerName = input(prompt)
 
     # Create peers dir if it doesn't exist yet
-    os.makedirs(Path(peersDir,selectedWGName), mode=644, exist_ok=True)
+    os.makedirs(Path(peersDir, selectedWGName), mode=644, exist_ok=True)
     peerFilePath = Path(peersDir, selectedWGName, peerName + defaultExt)
     peerQRCodePath = Path(peersDir, selectedWGName, peerName + "-qr.png")
     print(f"Peer file will be written to: {colored(peerFilePath, attrs=['bold'])}\n")
