@@ -374,7 +374,7 @@ def listPeersFromInterface(wc, selectedWGName):
 
 def main():
     # Check if program is being run as root
-    if not 'SUDO_UID' in os.environ.keys() or os.geteuid() != 0:
+    if not os.geteuid() == 0:
         print("You need to execute this program as root")
         sys.exit(1)
 
