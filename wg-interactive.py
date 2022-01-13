@@ -58,6 +58,7 @@ def deletePeerFromInterface(wc, selectedWGName, absWGPath):
         if not publicKey in peersByName.keys():
             peersByName[publicKey] = {
                 'Name': name,
+                'AllowedIPs': peer.get('AllowedIPs')
             }
 
     selection = 0
@@ -67,13 +68,14 @@ def deletePeerFromInterface(wc, selectedWGName, absWGPath):
     for key in peersByName.keys():
         peersByNameAsList.append({
             'PublicKey': key,
-            'Name': peersByName.get(key).get('Name')
+            'Name': peersByName.get(key).get('Name'),
+            'AllowedIPs': peersByName.get(key).get('AllowedIPs')
             })
     
     while not validInput:
         print("Please select a peer to delete:")
         for x in range(len(peersByNameAsList)):
-            print("[%2d] PublicKey: %s (%s)" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('Name')))
+            print("[%2d] PublicKey: %s\n     AllowedIPs: %s\n     Name: %s\n" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('AllowedIPs'), peersByNameAsList[x].get('Name')))
         selection = input(prompt)
         
         try:
@@ -357,18 +359,20 @@ def listPeersFromInterface(wc, selectedWGName):
         if not publicKey in peersByName.keys():
             peersByName[publicKey] = {
                 'Name': name,
+                'AllowedIPs': peer.get('AllowedIPs')
             }
 
     peersByNameAsList = []
     for key in peersByName.keys():
         peersByNameAsList.append({
             'PublicKey': key,
-            'Name': peersByName.get(key).get('Name')
+            'Name': peersByName.get(key).get('Name'),
+            'AllowedIPs': peersByName.get(key).get('AllowedIPs')
             })
     
     print(f"Peers in WireGuard interface {colored(selectedWGName, attrs=['bold'])}:")
     for x in range(len(peersByNameAsList)):
-        print("[%2d] PublicKey: %s (%s)" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('Name')))
+        print("[%2d] PublicKey: %s\n     AllowedIPs: %s\n     Name: %s\n" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('AllowedIPs'), peersByNameAsList[x].get('Name')))
     print("")
 
 
