@@ -376,6 +376,12 @@ def listPeersFromInterface(wc, selectedWGName):
     print("")
 
 
+# TODO add rename function
+def renamePeerInInterface(wc, selectedWGName, absWGPath):
+    print("Sorry, this hasn't been implemented yet. Exiting.")
+    raise NotImplementedError
+
+
 def main():
     # Check if program is being run as root
     if not os.geteuid() == 0:
@@ -396,7 +402,7 @@ def main():
 
     wgList = []
     
-    version = "0.2.2-alpha"
+    version = "0.2.3-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
@@ -465,6 +471,11 @@ Source: {website}"""
                 'short': 'list'
             },
             {
+                'letter': 'r',
+                'text': 'Rename peer',
+                'short': 'rename'
+            },
+            {
                 'letter': 'd',
                 'text': 'Delete peer',
                 'short': 'delete'
@@ -487,6 +498,7 @@ Source: {website}"""
     print(f"Selected operation: {colored(selectedOperation.get('short'), attrs=['bold'])}\n")
 
     if selectedOperation.get('short') == "add": addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath)
+    elif selectedOperation.get('short') == 'rename': renamePeerInInterface(wc, selectedWGName, absWGPath)
     elif selectedOperation.get('short') == 'delete': deletePeerFromInterface(wc, selectedWGName, absWGPath)
 
 
