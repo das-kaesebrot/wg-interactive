@@ -177,7 +177,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
                 else:
                     cprint("Invalid input", 'red')                    
         except ValueError:
-            cprint("Input needs to be a number or an IP without a subnet range", 'red')
+            cprint("Input needs to be either a domain, a number or an IP without a subnet range", 'red')
 
     endpoint = selectedAddr + ':' + str(selectedListenPort)
     print(f"Selected endpoint: {colored(endpoint, attrs=['bold'])}\n")
@@ -257,7 +257,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
                 else:
                     cprint("Invalid input", 'red')                    
         except ValueError:
-            cprint("Input needs to be a either a domain, a number or an IP without a subnet range", 'red')
+            cprint("Input needs to be a number or an IP without a subnet range", 'red')
     
     print(f"Selected peer IP: {colored(str(peerIP), attrs=['bold'])}\n")
 
