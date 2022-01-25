@@ -14,8 +14,8 @@ from pathlib import Path
 
 def reloadWGInterfaceIfRunning(ifaceName):                
     if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
-        with tempfile.NamedTemporaryFile() as tf:
-            tf.write(subprocess.run(["wg-quick", "strip", ifaceName], capture_output=True).stdout)
+        with tempfile.NamedTemporaryFile(mode="w+") as tf:
+            tf.write(subprocess.run(["wg-quick", "strip", ifaceName], capture_output=True).stdout.decode("utf-8"))
             p = subprocess.Popen(["wg", "setconf", ifaceName, tf.name])
             p.wait()
         print(f"Detected that selected WireGuard config is running\nReloaded wireguard interface {colored(ifaceName, attrs=['bold'])}")
