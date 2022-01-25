@@ -163,8 +163,10 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
         try:
             try:
                 if not validators.domain(selection):
-                    raise ValueError
-                selectedAddr = str(selection)
+                    test = ipaddress.ip_address(selection)
+                    selectedAddr = str(selection)
+                else:
+                    selectedAddr = str(selection)
                 validInput = True
                 inputIsDomainOrIP = True
             except:
