@@ -1,13 +1,16 @@
 .DEFAULT_GOAL := build
+.PHONY: build
 
 SCRIPT_NAME = wg-interactive
 
 
 build:
+		pipenv run pyinstaller --clean --onefile ${SCRIPT_NAME}.py
+
+init:
 		mkdir -pv .venv
 		pipenv --three
 		pipenv install --dev
-		pipenv run pyinstaller --clean --onefile ${SCRIPT_NAME}.py
 
 clean:
 		rm -rvf __pycache__ build dist *.spec
