@@ -17,7 +17,11 @@ Launch `wg-interactive.py` (or the binary) as root. The tool will prompt for all
 ## Build and install
 To build the script to a binary locally and install it afterwards, you may use the Makefile.
 
-Initialize a local python virtual environment and build the binary in there using PyInstaller:
+Initialize a local python virtual environment:
+
+```make init```
+
+Build the binary in there using PyInstaller:
 
 ```make```
 
