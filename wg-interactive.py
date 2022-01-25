@@ -455,7 +455,7 @@ def main():
 
     wgList = []
     
-    version = "0.2.3-alpha"
+    version = "0.2.4-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
