@@ -5,15 +5,18 @@ import wgconfig
 import ipaddress
 import netifaces
 import validators
+import tempfile
 from typing import OrderedDict
 from wgconfig import wgexec
 from termcolor import colored, cprint
 from pathlib import Path
 
 
-def reloadWGInterfaceIfRunning(ifaceName, absWGPath):                
+def reloadWGInterfaceIfRunning(ifaceName):                
     if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
-        subprocess.run(["wg", "setconf", ifaceName, absWGPath])
+        with tempfile.NamedTemporaryFile() as tf:
+            tf.write(subprocess.run(["wg-quick", "strip", ifaceName], capture_output=True).stdout)
+            subprocess.run(["wg", "setconf", ifaceName, tf.name])
         print(f"Detected that selected WireGuard config is running\nReloaded wireguard interface {colored(ifaceName, attrs=['bold'])}")
     else:
         print(f"Selected WireGuard config isn't running, skipping reload")
@@ -87,7 +90,7 @@ def deletePeerFromInterface(wc, selectedWGName, absWGPath):
                 wc.write_file(absWGPath)
                 print(f"Deleted peer {colored(peerToBeDeleted.get('PublicKey') + ' (' + peerToBeDeleted.get('Name') + ')', attrs=['bold'])}")
                 
-                reloadWGInterfaceIfRunning(selectedWGName, absWGPath)
+                reloadWGInterfaceIfRunning(selectedWGName)
                 
                 print("Done!")
                 sys.exit()
@@ -344,7 +347,7 @@ AllowedIPs = {selectedNetworks}
         peerfile.write(peerConfig)
         print(f"Wrote peer config to {colored(f'{peerFilePath}', attrs=['bold'])}")
     
-    reloadWGInterfaceIfRunning(selectedWGName, wgConfPath)
+    reloadWGInterfaceIfRunning(selectedWGName)
     print("Done!")
     sys.exit()
     
@@ -425,7 +428,7 @@ def renamePeerInInterface(wc, selectedWGName, absWGPath):
                 with open(absWGPath, "a") as configFile:
                     configFile.write(renamedPeerRaw)
                                     
-                reloadWGInterfaceIfRunning(selectedWGName, absWGPath)
+                reloadWGInterfaceIfRunning(selectedWGName)
                 
                 print("Done!")
                 sys.exit()
@@ -455,7 +458,7 @@ def main():
 
     wgList = []
     
-    version = "0.2.4-alpha"
+    version = "0.2.5-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
