@@ -376,10 +376,61 @@ def listPeersFromInterface(wc, selectedWGName):
     print("")
 
 
-# TODO add rename function
 def renamePeerInInterface(wc, selectedWGName, absWGPath):
-    print("Sorry, this hasn't been implemented yet. Exiting.")
-    raise NotImplementedError
+    peersByName = OrderedDict({})
+    for peerKey in wc.peers.keys():
+        name = 'Unnamed Peer'
+        peer = wc.peers.get(peerKey)
+        publicKey = peer.get('PublicKey')
+        for entry in peer.get('_rawdata'):
+            if entry.startswith('#'):
+                name = entry[2:]        
+        if not publicKey in peersByName.keys():
+            peersByName[publicKey] = {
+                'Name': name,
+                'AllowedIPs': peer.get('AllowedIPs')
+            }
+
+    peersByNameAsList = []
+    for key in peersByName.keys():
+        peersByNameAsList.append({
+            'PublicKey': key,
+            'Name': peersByName.get(key).get('Name'),
+            'AllowedIPs': peersByName.get(key).get('AllowedIPs')
+            })
+    
+    selection = 0
+    validInput = False
+    while not validInput:
+        print("Please select a peer to rename:")
+        for x in range(len(peersByNameAsList)):
+            print("[%2d] PublicKey: %s\n     AllowedIPs: %s\n     Name: %s\n" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('AllowedIPs'), peersByNameAsList[x].get('Name')))
+        selection = input(prompt)
+        
+        try:
+            selection = int(selection)
+            if (selection >= 0 ) and (selection < len(peersByNameAsList)):
+                validInput = True
+                peerToBeRenamed = wc.peers.get(peersByNameAsList[selection].get('PublicKey'))
+                wc.del_peer(peerToBeRenamed.get('PublicKey'))
+                wc.write_file(absWGPath)
+                newPeerName = input(f"\nPlease give a new name for the peer:\n{prompt}")
+                renamedPeerRaw = f"\n# {newPeerName}\n"
+                for entry in peerToBeRenamed.get('_rawdata'):
+                    if not entry.startswith('#'):
+                        renamedPeerRaw += f"{entry}\n"
+
+                with open(absWGPath, "a") as configFile:
+                    configFile.write(renamedPeerRaw)
+                                    
+                reloadWGInterfaceIfRunning(selectedWGName, absWGPath)
+                
+                print("Done!")
+                sys.exit()
+            else:
+                cprint("Invalid input", 'red')
+        except ValueError:
+            cprint("Input needs to be a number", 'red')
 
 
 def main():
