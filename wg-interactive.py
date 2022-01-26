@@ -457,6 +457,17 @@ def main():
     defaultExt = '.conf'
     prompt = "> "
     peersDir = "peers"
+    
+    # Determine absolute path of script/binary
+    if getattr(sys, 'frozen', False):
+        application_path = os.path.abspath(os.path.dirname(sys.executable))
+    elif __file__:
+        application_path = os.path.abspath(os.path.dirname(__file__))
+    
+    
+    peersDir = os.path.join(application_path, peersDir)
+    print(peersDir)
+        
 
     wgList = []
     
