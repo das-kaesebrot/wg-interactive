@@ -465,7 +465,7 @@ def main():
     etcConfigDir = Path("/etc/wg-interactive")
     wgConfPath = Path("/etc/wireguard")
     useEtcFolderForPeersOutput = False
-    
+        
     
     version = "0.3.0-alpha"
     twitterhandle = "das_kaesebrot"
@@ -492,17 +492,33 @@ Source: {website}"""
         os.makedirs(etcConfigDir, exist_ok=True)
         config = configparser.ConfigParser()
         print(f"Detected that binary is running from {colored('/usr/bin', attrs=['bold'])}, using config file")
-        else:
+        if os.path.isfile(confFilePath):
+            config.read(confFilePath)
+            if 'WGCONFPATH' in config.get('main').keys():
+                wgConfPath = Path(config.get('main').get('WGCONFPATH'))
+            if 'WGPEERSDIR' in config.get('main').keys():
+                peersDir = Path(config.get('main').get('WGPEERSDIR'))
+                if not os.path.isabs(peersDir):
                     cprint("WGPEERSDIR must be an absolute path", 'red')
                     sys.exit(1)
-            config.read_file(confFilePath)
-            wgConfPath = Path(config.get('main').get('wgConfPath'))
-            
-    # environment variable always takes precedence over config file
-    if os.getenv("WGCONFPATH"): wgConfPath = Path(os.getenv("WGCONFPATH"))
+        else:
+            with open(confFilePath, 'w') as f:
+                f.write("""[main]
+# WGCONFPATH = /etc/wireguard
+# WGPEERSDIR = /your/path/to/peers
+""")
+        
+    # environment variable always take precedence over config file
+    if os.getenv("WGCONFPATH"):
+        wgConfPath = Path(os.getenv("WGCONFPATH"))
+    if os.getenv("WGPEERSDIR"):
+        peersDir = Path(os.getenv("WGPEERSDIR"))
+        if not os.path.isabs(peersDir):
+            cprint("WGPEERSDIR must be an absolute path", 'red')
+            sys.exit(1)
     
-    peersDir = os.path.join(application_path, peersDir)
-    print(peersDir)
+    if not os.path.isabs(peersDir):
+        peersDir = os.path.join(application_path, peersDir)
         
 
     wgList = []
