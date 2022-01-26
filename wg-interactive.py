@@ -28,7 +28,8 @@ def getWGInterfaces(wgConfPath, defaultExt):
     for file in os.listdir(wgConfPath):
         if file.endswith(defaultExt):
             returnList.append(file[:-len(defaultExt)])
-            
+    
+    returnList.sort()
     return returnList
 
 
@@ -447,7 +448,7 @@ def main():
 
     # Static vars
     if os.getenv("WGCONFPATH"): wgConfPath = Path(os.getenv("WGCONFPATH"))
-    else: wgConfPath = Path("/etc/wireguard")    
+    else: wgConfPath = Path("/etc/wireguard")
     
     global prompt
     global defaultExt
@@ -459,7 +460,7 @@ def main():
 
     wgList = []
     
-    version = "0.2.5-alpha"
+    version = "0.2.6-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
