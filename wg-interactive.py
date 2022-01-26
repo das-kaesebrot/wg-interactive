@@ -494,18 +494,18 @@ Source: {website}\n\n"""
         print(f"Detected that binary is running from {colored('/usr/bin', attrs=['bold'])}, using config file")
         if os.path.isfile(confFilePath):
             config.read(confFilePath)
-            if 'WGCONFPATH' in config.get('main').keys():
-                wgConfPath = Path(config.get('main').get('WGCONFPATH'))
-            if 'WGPEERSDIR' in config.get('main').keys():
-                peersDir = Path(config.get('main').get('WGPEERSDIR'))
+            if 'wgconfpath' in config['main']:
+                wgConfPath = Path(config['main'].get('wgconfpath'))
+            if 'wgpeersdir' in config['main']:
+                peersDir = Path(config['main'].get('wgpeersdir'))
                 if not os.path.isabs(peersDir):
-                    cprint("WGPEERSDIR must be an absolute path", 'red')
+                    cprint("wgpeersdir must be an absolute path", 'red')
                     sys.exit(1)
         else:
             with open(confFilePath, 'w') as f:
                 f.write("""[main]
-# WGCONFPATH = /etc/wireguard
-# WGPEERSDIR = /your/path/to/peers
+# wgconfpath = /etc/wireguard
+# wgpeersdir = /your/path/to/peers
 """)
         
     # environment variable always take precedence over config file
