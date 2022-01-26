@@ -467,7 +467,7 @@ def main():
     useEtcFolderForPeersOutput = False
         
     
-    version = "0.3.0-alpha"
+    version = "0.3.1-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
@@ -501,6 +501,8 @@ Source: {website}\n\n"""
                 if not os.path.isabs(peersDir):
                     cprint("wgpeersdir must be an absolute path", 'red')
                     sys.exit(1)
+            else:
+                peersDir = Path(os.path.join(etcConfigDir, peersDir))
         else:
             with open(confFilePath, 'w') as f:
                 f.write("""[main]
