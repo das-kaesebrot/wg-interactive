@@ -478,13 +478,10 @@ def main():
         confFilePath = os.path.join(etcConfigDir, 'wg-interactive.ini')
         os.makedirs(etcConfigDir, exist_ok=True)
         config = configparser.ConfigParser()
-        if not os.path.isfile(confFilePath):
-            config['main'] = {
-                'wgConfPath': wgConfPath
-            }
-            with open(confFilePath, 'x') as f:
-                config.write(f)
+        print(f"Detected that binary is running from {colored('/usr/bin', attrs=['bold'])}, using config file")
         else:
+                    cprint("WGPEERSDIR must be an absolute path", 'red')
+                    sys.exit(1)
             config.read_file(confFilePath)
             wgConfPath = Path(config.get('main').get('wgConfPath'))
             
