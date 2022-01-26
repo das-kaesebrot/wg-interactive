@@ -6,6 +6,7 @@ import ipaddress
 import netifaces
 import validators
 import tempfile
+import configparser
 from typing import OrderedDict
 from wgconfig import wgexec
 from termcolor import colored, cprint
@@ -193,8 +194,13 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     peerName = input(prompt)
 
     # Create peers dir if it doesn't exist yet
-    os.makedirs(Path(peersDir, selectedWGName), mode=644, exist_ok=True)
-    peerFilePath = Path(peersDir, selectedWGName, peerName + defaultExt)
+    # use /etc folder if running from binary
+    if useEtcFolderForPeersOutput:
+        os.makedirs(Path(etcConfigDir, selectedWGName), mode=644, exist_ok=True)
+        peerFilePath = Path(etcConfigDir, selectedWGName, peerName + defaultExt)
+    else:
+        os.makedirs(Path(peersDir, selectedWGName), mode=644, exist_ok=True)
+        peerFilePath = Path(peersDir, selectedWGName, peerName + defaultExt)
     print(f"Peer file will be written to: {colored(peerFilePath, attrs=['bold'])}\n")
     collectedAddresses = []
     recommendedAddresses = []
@@ -445,18 +451,20 @@ def main():
     if not os.geteuid() == 0:
         print("You need to execute this program as root")
         sys.exit(1)
-
-    # Static vars
-    if os.getenv("WGCONFPATH"): wgConfPath = Path(os.getenv("WGCONFPATH"))
-    else: wgConfPath = Path("/etc/wireguard")
     
+    # Static vars    
     global prompt
     global defaultExt
     global peersDir
+    global etcConfigDir
+    global useEtcFolderForPeersOutput
     
     defaultExt = '.conf'
     prompt = "> "
     peersDir = "peers"
+    etcConfigDir = Path("/etc/wg-interactive")
+    wgConfPath = Path("/etc/wireguard")
+    useEtcFolderForPeersOutput = False
     
     # Determine absolute path of script/binary
     if getattr(sys, 'frozen', False):
@@ -464,6 +472,24 @@ def main():
     elif __file__:
         application_path = os.path.abspath(os.path.dirname(__file__))
     
+    # Create config file directory if it doesn't exist,
+    # but only if the binary has been copied to /usr/bin
+    if application_path == "/usr/bin":
+        confFilePath = os.path.join(etcConfigDir, 'wg-interactive.ini')
+        os.makedirs(etcConfigDir, exist_ok=True)
+        config = configparser.ConfigParser()
+        if not os.path.isfile(confFilePath):
+            config['main'] = {
+                'wgConfPath': wgConfPath
+            }
+            with open(confFilePath, 'x') as f:
+                config.write(f)
+        else:
+            config.read_file(confFilePath)
+            wgConfPath = Path(config.get('main').get('wgConfPath'))
+            
+    # environment variable always takes precedence over config file
+    if os.getenv("WGCONFPATH"): wgConfPath = Path(os.getenv("WGCONFPATH"))
     
     peersDir = os.path.join(application_path, peersDir)
     print(peersDir)
@@ -471,7 +497,7 @@ def main():
 
     wgList = []
     
-    version = "0.2.7-alpha"
+    version = "0.2.8-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
