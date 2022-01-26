@@ -475,7 +475,7 @@ def main():
 
 An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers.
 by @{twitterhandle}
-Source: {website}"""
+Source: {website}\n\n"""
 
     print(banner)
     
