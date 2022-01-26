@@ -21,8 +21,8 @@ If the script detects that it's running as a compiled binary from `/usr/bin`, it
 To configure using the config file, uncomment the variables in `/etc/wg-interactive/wg-interactive.ini` and set a value:
 ```ini
 [main]
-# WGCONFPATH = /etc/wireguard
-# WGPEERSDIR = /your/path/to/peers
+# wgconfpath = /etc/wireguard
+# wgpeersdir = /your/path/to/peers
 ```
 
 If the script detects that it's running as a compiled binary from `/usr/bin`, it will write generated peer configuration files to `/etc/wg-interactive/peers/INTERFACENAME/PEERNAME.conf`, otherwise it will resolve the absolute path of the script and write to a subfolder using the pattern `peers/INTERFACENAME/PEERNAME.conf`.
