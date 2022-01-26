@@ -125,7 +125,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
                 if ipaddress.ip_address(addrGet).is_global:
                     recommendedEndpoints.append(addrGet)
 
-    if '.' in os.uname()[0]:
+    if '.' in os.uname()[1]:
         recommendedEndpoints.append(os.uname()[1])
 
     selection = 0
@@ -460,7 +460,7 @@ def main():
 
     wgList = []
     
-    version = "0.2.6-alpha"
+    version = "0.2.7-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
