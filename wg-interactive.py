@@ -466,6 +466,19 @@ def main():
     wgConfPath = Path("/etc/wireguard")
     useEtcFolderForPeersOutput = False
     
+    
+    version = "0.3.0-alpha"
+    twitterhandle = "das_kaesebrot"
+    website = "https://github.com/das-kaesebrot/wg-interactive"
+    
+    banner = f"""{colored(f'wg-interactive.py v{version}', attrs=['bold'])}
+
+An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers.
+by @{twitterhandle}
+Source: {website}"""
+
+    print(banner)
+    
     # Determine absolute path of script/binary
     if getattr(sys, 'frozen', False):
         application_path = os.path.abspath(os.path.dirname(sys.executable))
@@ -494,17 +507,7 @@ def main():
 
     wgList = []
     
-    version = "0.2.8-alpha"
-    twitterhandle = "das_kaesebrot"
-    website = "https://github.com/das-kaesebrot/wg-interactive"
-    
-    banner = f"""{colored(f'wg-interactive.py v{version}', attrs=['bold'])}
-
-An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers.
-by @{twitterhandle}
-Source: {website}"""
-    
-    print(banner, f"\n\nUsing WireGuard config path {colored(wgConfPath, attrs=['bold'])}")
+    print(f"Using WireGuard config path {colored(wgConfPath, attrs=['bold'])}")
     
     wgList = getWGInterfaces(wgConfPath, defaultExt)
 
