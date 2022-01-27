@@ -13,6 +13,11 @@ from termcolor import colored, cprint
 from pathlib import Path
 
 
+def checkIfInterfaceIsRunning(ifaceName):
+    if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
+        print(f"{colored(ifaceName, attrs=['bold'])} is active. Auto reload after changes enabled.")
+    else:
+        print(f"{colored(ifaceName, attrs=['bold'])} is not active. Skipping auto reload after changes are made.")
 
 
 def checkIfInterfaceIsEnabledOnSystemd(ifaceName):
@@ -488,7 +493,7 @@ def main():
 
 An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers.
 by @{twitterhandle}
-Source: {website}\n\n"""
+Source: {website}\n"""
 
     print(banner)
     
@@ -574,6 +579,10 @@ Source: {website}\n\n"""
 
     selectedWGName = wgList[selection]
     absWGPath = getAbsWGPath(wgConfPath, selectedWGName, defaultExt)
+
+    print(f"\nSelected interface: {colored(absWGPath, attrs=['bold'])}")
+    
+    checkIfInterfaceIsRunning(selectedWGName)    
     checkIfInterfaceIsEnabledOnSystemd(selectedWGName)
     print()
 
