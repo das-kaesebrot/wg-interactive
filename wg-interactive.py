@@ -13,6 +13,19 @@ from termcolor import colored, cprint
 from pathlib import Path
 
 
+
+
+def checkIfInterfaceIsEnabledOnSystemd(ifaceName):
+    # Check if host is using systemd
+    if os.path.exists("/run/systemd/system"):
+        if subprocess.run(["systemctl", "is-enabled", f"wg-quick@{ifaceName}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
+            print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is enabled")
+        else:
+            print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is not enabled ")
+    else:
+        print(f"Seems like host doesn't use systemd, skipping check for service")
+
+
 def reloadWGInterfaceIfRunning(ifaceName):                
     if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
         with tempfile.NamedTemporaryFile(mode="w+") as tf:
@@ -561,7 +574,8 @@ Source: {website}\n\n"""
 
     selectedWGName = wgList[selection]
     absWGPath = getAbsWGPath(wgConfPath, selectedWGName, defaultExt)
-    print(f"Selected interface: {colored(absWGPath, attrs=['bold'])}\n")
+    checkIfInterfaceIsEnabledOnSystemd(selectedWGName)
+    print()
 
     wc = wgconfig.WGConfig(absWGPath)
     wc.read_file()
