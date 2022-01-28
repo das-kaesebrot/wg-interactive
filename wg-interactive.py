@@ -15,9 +15,9 @@ from pathlib import Path
 
 def checkIfInterfaceIsRunning(ifaceName):
     if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
-        print(f"{colored(ifaceName, attrs=['bold'])} is active. Auto reload after changes enabled.")
+        print(f"{colored(ifaceName, attrs=['bold'])} is {colored('active', color='green')}. Auto reload after changes enabled.")
     else:
-        print(f"{colored(ifaceName, attrs=['bold'])} is not active. Skipping auto reload after changes are made.")
+        print(f"{colored(ifaceName, attrs=['bold'])} is {colored('not active', color='red')}. Skipping auto reload after changes are made.")
 
 def checkIfHostIsUsingSystemd():
     return os.path.exists("/run/systemd/system")
@@ -26,9 +26,9 @@ def checkIfInterfaceIsEnabledOnSystemd(ifaceName):
     # Check if host is using systemd
     if checkIfHostIsUsingSystemd():
         if subprocess.run(["systemctl", "is-enabled", f"wg-quick@{ifaceName}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
-            print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is enabled")
+            print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is {colored('enabled', color='green')}")
         else:
-            print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is not enabled ")
+            print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is {colored('not enabled', color='red')}")
     else:
         print(f"Seems like host doesn't use systemd, skipping check for service")
 
