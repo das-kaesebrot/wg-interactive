@@ -19,16 +19,24 @@ def checkIfInterfaceIsRunning(ifaceName):
     else:
         print(f"{colored(ifaceName, attrs=['bold'])} is not active. Skipping auto reload after changes are made.")
 
+def checkIfHostIsUsingSystemd():
+    return os.path.exists("/run/systemd/system")
 
 def checkIfInterfaceIsEnabledOnSystemd(ifaceName):
     # Check if host is using systemd
-    if os.path.exists("/run/systemd/system"):
+    if checkIfHostIsUsingSystemd():
         if subprocess.run(["systemctl", "is-enabled", f"wg-quick@{ifaceName}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
             print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is enabled")
         else:
             print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is not enabled ")
     else:
         print(f"Seems like host doesn't use systemd, skipping check for service")
+
+def FlipSystemdEnabledState(ifaceName):
+    if subprocess.run(["systemctl", "is-enabled", f"wg-quick@{ifaceName}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
+        subprocess.run(["systemctl", "disable", f"wg-quick@{ifaceName}"])
+    else:
+        subprocess.run(["systemctl", "enable", f"wg-quick@{ifaceName}"])
 
 
 def reloadWGInterfaceIfRunning(ifaceName):                
@@ -485,7 +493,7 @@ def main():
     useEtcFolderForPeersOutput = False
         
     
-    version = "0.3.1-alpha"
+    version = "0.3.2-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
@@ -616,6 +624,12 @@ Source: {website}\n"""
                 'text': 'Delete peer',
                 'short': 'delete'
             }]
+        if checkIfHostIsUsingSystemd():
+            ops.append({
+                'letter': 's',
+                'text': 'Flip enabled state for wg-quick systemd service',
+                'short': 'systemd-enabled'
+            })
         for x in range(len(ops)):
             print("[%c] %s" % (ops[x].get('letter'), ops[x].get('text')))
         selection = input(prompt)
@@ -636,6 +650,7 @@ Source: {website}\n"""
     if selectedOperation.get('short') == "add": addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath)
     elif selectedOperation.get('short') == 'rename': renamePeerInInterface(wc, selectedWGName, absWGPath)
     elif selectedOperation.get('short') == 'delete': deletePeerFromInterface(wc, selectedWGName, absWGPath)
+    elif selectedOperation.get('short') == 'systemd-enabled': FlipSystemdEnabledState(selectedWGName)
 
 
 if __name__ == "__main__":
