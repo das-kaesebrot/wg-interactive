@@ -320,7 +320,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
                         selectedNetworks = []
                         selectedNetworks.append(ipaddress.ip_network(ipNet))
                 else:
-                    selectedNetworks = ipaddress.ip_network(ipNet)
+                    selectedNetworks = ipaddress.ip_network(selection)
                 validInput, inputIsNet = True, True
             except:
                 pass
