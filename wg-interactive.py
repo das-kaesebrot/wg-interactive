@@ -493,7 +493,7 @@ def main():
     useEtcFolderForPeersOutput = False
         
     
-    version = "0.3.2-alpha"
+    version = "0.3.3-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
@@ -514,6 +514,7 @@ Source: {website}\n"""
     # Create config file directory if it doesn't exist,
     # but only if the binary has been copied to /usr/bin
     if application_path == "/usr/bin":
+        useEtcFolderForPeersOutput = True
         confFilePath = os.path.join(etcConfigDir, 'wg-interactive.ini')
         os.makedirs(etcConfigDir, exist_ok=True)
         config = configparser.ConfigParser()
@@ -535,7 +536,7 @@ Source: {website}\n"""
 # wgconfpath = /etc/wireguard
 # wgpeersdir = /your/path/to/peers
 """)
-        
+
     # environment variable always take precedence over config file
     if os.getenv("WGCONFPATH"):
         wgConfPath = Path(os.getenv("WGCONFPATH"))
