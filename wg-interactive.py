@@ -232,7 +232,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     recommendedAddresses = []
     if wc.peers == {}:
         addrRange = wc.interface.get('Address')
-        if type(addrRange) == list:
+        if isinstance(addrRange, list):
             for ipIface in addrRange:
                 collectedAddresses.append(ipaddress.ip_interface(ipIface))
         else:
@@ -242,7 +242,7 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
         tempIPList = []
         for peer in wc.peers:
             allowedIPsFromPeer = wc.peers.get(peer).get('AllowedIPs')
-            if type(allowedIPsFromPeer) == list:
+            if isinstance(allowedIPsFromPeer, list):
                 for allowedIPEntry in allowedIPsFromPeer:
                     tempIPList.append(ipaddress.ip_interface(allowedIPEntry))
             else:
@@ -371,7 +371,7 @@ PrivateKey = {privateKey}
 [Peer]
 PublicKey = {wgexec.get_publickey(wc.interface.get('PrivateKey'))}
 Endpoint = {endpoint}
-AllowedIPs = {','.join(selectedNetworks) if type(selectedNetworks) == list else selectedNetworks}
+AllowedIPs = {','.join(selectedNetworks) if isinstance(selectedNetworks, list) else selectedNetworks}
 {"PersistentKeepalive = 25" if persistentKeepalive else ""}\n"""
 
     wc.add_peer(publicKey, f"# {peerName}")
