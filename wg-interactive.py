@@ -222,10 +222,10 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     # Create peers dir if it doesn't exist yet
     # use /etc folder if running from binary
     if useEtcFolderForPeersOutput:
-        os.makedirs(Path(etcConfigDir, selectedWGName), mode=644, exist_ok=True)
-        peerFilePath = Path(etcConfigDir, selectedWGName, peerName + defaultExt)
+        os.makedirs(Path(etcConfigDir, "peers", selectedWGName), mode=0o644, exist_ok=True)
+        peerFilePath = Path(etcConfigDir, "peers", selectedWGName, peerName + defaultExt)
     else:
-        os.makedirs(Path(peersDir, selectedWGName), mode=644, exist_ok=True)
+        os.makedirs(Path(peersDir, selectedWGName), mode=0o644, exist_ok=True)
         peerFilePath = Path(peersDir, selectedWGName, peerName + defaultExt)
     print(f"Peer file will be written to: {colored(peerFilePath, attrs=['bold'])}\n")
     collectedAddresses = []
