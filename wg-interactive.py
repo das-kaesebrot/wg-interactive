@@ -316,9 +316,10 @@ def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
             try:
                 if ',' in selection:
                     selectionList = selection.split(',')
+                    selectedNetworks = []
                     for ipNet in selectionList:
-                        selectedNetworks = []
-                        selectedNetworks.append(ipaddress.ip_network(ipNet))
+                        _ = ipaddress.ip_network(ipNet)
+                        selectedNetworks.append(ipNet)
                 else:
                     selectedNetworks = ipaddress.ip_network(selection)
                 validInput, inputIsNet = True, True
@@ -370,7 +371,7 @@ PrivateKey = {privateKey}
 [Peer]
 PublicKey = {wgexec.get_publickey(wc.interface.get('PrivateKey'))}
 Endpoint = {endpoint}
-AllowedIPs = {selectedNetworks}
+AllowedIPs = {','.join(selectedNetworks) if type(selectedNetworks) == list else selectedNetworks}
 {"PersistentKeepalive = 25" if persistentKeepalive else ""}\n"""
 
     wc.add_peer(publicKey, f"# {peerName}")
