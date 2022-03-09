@@ -518,13 +518,9 @@ def regeneratePeerPublicKey(wc, selectedWGName, absWGPath):
                 peerSection = "\n"
                 publicKeyRaw = f"PublicKey = {publicKey}\n"
                 for entry in peerToBeRegenerated.get('_rawdata'):
-                    if entry.startswith('#') or entry.startswith('[Peer]'):
-                        peerSection += f"{entry}\n"
-                
-                peerSection += publicKeyRaw
-                
-                for entry in peerToBeRegenerated.get('_rawdata'):
-                    if not (entry.startswith('#') or entry.startswith('[Peer]') or entry.startswith('PublicKey')):
+                    if entry.startswith('PublicKey'):
+                        peerSection += publicKeyRaw
+                    else:
                         peerSection += f"{entry}\n"
 
                 with open(absWGPath, "a") as configFile:
