@@ -32,6 +32,7 @@ def checkIfInterfaceIsEnabledOnSystemd(ifaceName):
     else:
         print(f"Seems like host doesn't use systemd, skipping check for service")
 
+
 def FlipSystemdEnabledState(ifaceName):
     if subprocess.run(["systemctl", "is-enabled", f"wg-quick@{ifaceName}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
         subprocess.run(["systemctl", "disable", f"wg-quick@{ifaceName}"])
@@ -473,6 +474,73 @@ def renamePeerInInterface(wc, selectedWGName, absWGPath):
             cprint("Input needs to be a number", 'red')
 
 
+def regeneratePeerPublicKey(wc, selectedWGName, absWGPath):
+    peersByName = OrderedDict({})
+    for peerKey in wc.peers.keys():
+        name = 'Unnamed Peer'
+        peer = wc.peers.get(peerKey)
+        publicKey = peer.get('PublicKey')
+        for entry in peer.get('_rawdata'):
+            if entry.startswith('#'):
+                name = entry[2:]        
+        if not publicKey in peersByName.keys():
+            peersByName[publicKey] = {
+                'Name': name,
+                'AllowedIPs': peer.get('AllowedIPs')
+            }
+
+    peersByNameAsList = []
+    for key in peersByName.keys():
+        peersByNameAsList.append({
+            'PublicKey': key,
+            'Name': peersByName.get(key).get('Name'),
+            'AllowedIPs': peersByName.get(key).get('AllowedIPs')
+            })
+    
+    selection = 0
+    validInput = False
+    while not validInput:
+        print("Please select a peer to regenerate keypair for:")
+        for x in range(len(peersByNameAsList)):
+            print("[%2d] PublicKey: %s\n     AllowedIPs: %s\n     Name: %s\n" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('AllowedIPs'), peersByNameAsList[x].get('Name')))
+        selection = input(prompt)
+        
+        try:
+            selection = int(selection)
+            if (selection >= 0 ) and (selection < len(peersByNameAsList)):
+                validInput = True
+                peerToBeRegenerated = wc.peers.get(peersByNameAsList[selection].get('PublicKey'))
+                wc.del_peer(peerToBeRegenerated.get('PublicKey'))
+                wc.write_file(absWGPath)
+                
+                privateKey, publicKey = wgexec.generate_keypair()
+                
+                peerSection = "\n"
+                publicKeyRaw = f"PublicKey = {publicKey}\n"
+                for entry in peerToBeRegenerated.get('_rawdata'):
+                    if entry.startswith('#') or entry.startswith('[Peer]'):
+                        peerSection += f"{entry}\n"
+                
+                peerSection += publicKeyRaw
+                
+                for entry in peerToBeRegenerated.get('_rawdata'):
+                    if not (entry.startswith('#') or entry.startswith('[Peer]') or entry.startswith('PublicKey')):
+                        peerSection += f"{entry}\n"
+
+                with open(absWGPath, "a") as configFile:
+                    configFile.write(peerSection)
+                                    
+                reloadWGInterfaceIfRunning(selectedWGName)
+                
+                print(f"Done!\nPlease give the following private key to the peer to swap out in their config file:\n{privateKey}")
+                cprint("WARNING! After this, the private key is lost and will not be shown again!", 'red')
+                sys.exit()
+            else:
+                cprint("Invalid input", 'red')
+        except ValueError:
+            cprint("Input needs to be a number", 'red')
+
+
 def main():
     # Check if program is being run as root
     if not os.geteuid() == 0:
@@ -494,7 +562,7 @@ def main():
     useEtcFolderForPeersOutput = False
         
     
-    version = "0.3.3-alpha"
+    version = "0.3.4-alpha"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
@@ -622,6 +690,11 @@ Source: {website}\n"""
                 'short': 'rename'
             },
             {
+                'letter': 'k',
+                'text': 'Generate new keypair for peer',
+                'short': 'keypair'
+            },
+            {
                 'letter': 'd',
                 'text': 'Delete peer',
                 'short': 'delete'
@@ -651,6 +724,7 @@ Source: {website}\n"""
 
     if selectedOperation.get('short') == "add": addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath)
     elif selectedOperation.get('short') == 'rename': renamePeerInInterface(wc, selectedWGName, absWGPath)
+    elif selectedOperation.get('short') == 'keypair': regeneratePeerPublicKey(wc, selectedWGName, absWGPath)
     elif selectedOperation.get('short') == 'delete': deletePeerFromInterface(wc, selectedWGName, absWGPath)
     elif selectedOperation.get('short') == 'systemd-enabled': FlipSystemdEnabledState(selectedWGName)
 
