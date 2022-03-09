@@ -558,7 +558,7 @@ def main():
     useEtcFolderForPeersOutput = False
         
     
-    version = "0.3.4-alpha"
+    version = "0.4.0-beta"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
