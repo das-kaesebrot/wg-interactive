@@ -66,7 +66,11 @@ def getAbsWGPath (wgConfPath, selectedWGName, defaultExt):
 
 
 def getClientIPWithMaskFromPreviousPeers(wc, ipAddr):
-    return ipaddress.ip_interface(str(ipAddr) + "/" + str(ipaddress.ip_interface(wc.peers.get(list(wc.peers.keys())[-1]).get('AllowedIPs')).netmask))
+    if len(list(wc.peers.keys())) > 0:
+        return ipaddress.ip_interface(str(ipAddr) + "/" + str(ipaddress.ip_interface(wc.peers.get(list(wc.peers.keys())[-1]).get('AllowedIPs')).netmask))
+    else:
+        print("Defaulting to server-side netmask of /32 since no previous peers could be found.")
+        return ipaddress.ip_interface(str(ipAddr) + "/32")
 
 
 # TODO add init function
@@ -558,7 +562,7 @@ def main():
     useEtcFolderForPeersOutput = False
         
     
-    version = "0.4.0-beta"
+    version = "0.4.1-beta"
     twitterhandle = "das_kaesebrot"
     website = "https://github.com/das-kaesebrot/wg-interactive"
     
