@@ -1,6 +1,7 @@
+wgi = __import__(".wg-interactive")
 
 def main():
-    pass
+    wgi.main()
 
 if __name__ == "__main__":
     main()

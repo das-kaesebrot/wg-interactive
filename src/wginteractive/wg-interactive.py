@@ -12,6 +12,8 @@ from wgconfig import wgexec
 from termcolor import colored, cprint
 from pathlib import Path
 
+from .utility.systemd import Systemd
+from .utility.validation import Validation
 
 def checkIfInterfaceIsRunning(ifaceName):
     if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
@@ -31,14 +33,7 @@ def checkIfInterfaceIsEnabledOnSystemd(ifaceName):
             print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is {colored('not enabled', color='red')}")
     else:
         print(f"Seems like host doesn't use systemd, skipping check for service")
-
-
-def FlipSystemdEnabledState(ifaceName):
-    if subprocess.run(["systemctl", "is-enabled", f"wg-quick@{ifaceName}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
-        subprocess.run(["systemctl", "disable", f"wg-quick@{ifaceName}"])
-    else:
-        subprocess.run(["systemctl", "enable", f"wg-quick@{ifaceName}"])
-
+        
 
 def reloadWGInterfaceIfRunning(ifaceName):                
     if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
@@ -726,7 +721,7 @@ Source: {website}\n"""
     elif selectedOperation.get('short') == 'rename': renamePeerInInterface(wc, selectedWGName, absWGPath)
     elif selectedOperation.get('short') == 'keypair': regeneratePeerPublicKey(wc, selectedWGName, absWGPath)
     elif selectedOperation.get('short') == 'delete': deletePeerFromInterface(wc, selectedWGName, absWGPath)
-    elif selectedOperation.get('short') == 'systemd-enabled': FlipSystemdEnabledState(selectedWGName)
+    elif selectedOperation.get('short') == 'systemd-enabled': Systemd.flip_enabled_status(selectedWGName)
 
 
 if __name__ == "__main__":
