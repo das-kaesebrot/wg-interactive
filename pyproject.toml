@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wg-interactive"
+version = "0.4.1"
+
+authors = [
+    { name="Julian", email="mail@kaesebrot.eu" }
+]
+
+description = "A cli utility for interactively modifying wireguard servers."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    
+    "Development Status :: 4 - Beta",
+
+    "Intended Audience :: System administrators",
+]
+
+dependencies=[
+  "wgconfig>=0.2.2",
+  "termcolor>=1.1.0",
+  "netifaces==0.11.0",
+  "validators==0.18.2"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/das-kaesebrot/wg-interactive"
+"Bug Tracker" = "https://github.com/das-kaesebrot/wg-interactive/issues"
+
+[project.scripts]
+wg-interactive = "wginteractive.entrypoint:main"
