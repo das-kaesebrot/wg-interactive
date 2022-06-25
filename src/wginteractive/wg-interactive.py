@@ -12,28 +12,9 @@ from wgconfig import wgexec
 from termcolor import colored, cprint
 from pathlib import Path
 
+from .utility.wghandler import WireGuardHandler
 from .utility.systemd import Systemd
 from .utility.validation import Validation
-
-def checkIfInterfaceIsRunning(ifaceName):
-    if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
-        print(f"{colored(ifaceName, attrs=['bold'])} is {colored('active', color='green')}. Auto reload after changes enabled.")
-    else:
-        print(f"{colored(ifaceName, attrs=['bold'])} is {colored('not active', color='red')}. Skipping auto reload after changes are made.")
-
-def checkIfHostIsUsingSystemd():
-    return os.path.exists("/run/systemd/system")
-
-def checkIfInterfaceIsEnabledOnSystemd(ifaceName):
-    # Check if host is using systemd
-    if checkIfHostIsUsingSystemd():
-        if subprocess.run(["systemctl", "is-enabled", f"wg-quick@{ifaceName}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
-            print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is {colored('enabled', color='green')}")
-        else:
-            print(f"Service {colored(f'wg-quick@{ifaceName}', attrs=['bold'])} is {colored('not enabled', color='red')}")
-    else:
-        print(f"Seems like host doesn't use systemd, skipping check for service")
-        
 
 def reloadWGInterfaceIfRunning(ifaceName):                
     if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
@@ -655,10 +636,11 @@ Source: {website}\n"""
 
     print(f"\nSelected interface: {colored(absWGPath, attrs=['bold'])}")
     
-    checkIfInterfaceIsRunning(selectedWGName)    
-    checkIfInterfaceIsEnabledOnSystemd(selectedWGName)
-    print()
-
+    wghandler = WireGuardHandler(selectedWGName)
+    
+    wghandler.check_if_interface_is_running()
+    wghandler.check_if_wg_interface_is_enabled_on_systemd()
+    
     wc = wgconfig.WGConfig(absWGPath)
     wc.read_file()
 
