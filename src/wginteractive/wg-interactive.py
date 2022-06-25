@@ -1,45 +1,21 @@
 import sys
 import os
-import subprocess
 import wgconfig
 import ipaddress
 import netifaces
 import validators
-import tempfile
-import configparser
 from typing import OrderedDict
 from wgconfig import wgexec
 from termcolor import colored, cprint
 from pathlib import Path
 
+from .classes.wginterface import WireGuardInterface
 from .utility.wghandler import WireGuardHandler
 from .utility.systemd import Systemd
-from .utility.validation import Validation
-
-def reloadWGInterfaceIfRunning(ifaceName):                
-    if subprocess.run(["wg", "show", ifaceName], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT).returncode == 0:
-        with tempfile.NamedTemporaryFile(mode="w+") as tf:
-            tf.write(subprocess.run(["wg-quick", "strip", ifaceName], capture_output=True).stdout.decode("utf-8"))
-            tf.seek(0)
-            subprocess.run(["wg", "setconf", ifaceName, tf.name])
-        print(f"Detected that selected WireGuard config is running\nReloaded wireguard interface {colored(ifaceName, attrs=['bold'])}")
-    else:
-        print(f"Selected WireGuard config isn't running, skipping reload")
-
-    
-def getWGInterfaces(wgConfPath, defaultExt):
-    returnList = []
-    for file in os.listdir(wgConfPath):
-        if file.endswith(defaultExt):
-            returnList.append(file[:-len(defaultExt)])
-    
-    returnList.sort()
-    return returnList
-
+from .classes.config import Config
 
 def getAbsWGPath (wgConfPath, selectedWGName, defaultExt):
     return Path(wgConfPath, selectedWGName + defaultExt)
-
 
 def getClientIPWithMaskFromPreviousPeers(wc, ipAddr):
     if len(list(wc.peers.keys())) > 0:
@@ -48,12 +24,9 @@ def getClientIPWithMaskFromPreviousPeers(wc, ipAddr):
         print("Defaulting to server-side netmask of /32 since no previous peers could be found.")
         return ipaddress.ip_interface(str(ipAddr) + "/32")
 
-
 # TODO add init function
 def initNewInterface():
-    print("Sorry, this hasn't been implemented yet. Exiting.")
-    raise NotImplementedError
-
+    raise NotImplementedError("Init not implemented yet")
 
 def deletePeerFromInterface(wc, selectedWGName, absWGPath):
     if wc.peers == {}:
@@ -108,7 +81,6 @@ def deletePeerFromInterface(wc, selectedWGName, absWGPath):
                 cprint("Invalid input", 'red')
         except ValueError:
             cprint("Input needs to be a number", 'red')
-
 
 def addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath):
     listenPorts = [int(wc.interface.get('ListenPort'))]
@@ -367,7 +339,6 @@ AllowedIPs = {','.join(selectedNetworks) if isinstance(selectedNetworks, list) e
     print("Done!")
     sys.exit()
     
-
 def listPeersFromInterface(wc, selectedWGName):
     peersByName = OrderedDict({})
     for peerKey in wc.peers.keys():
@@ -395,7 +366,6 @@ def listPeersFromInterface(wc, selectedWGName):
     for x in range(len(peersByNameAsList)):
         print("[%2d] PublicKey: %s\n     AllowedIPs: %s\n     Name: %s\n" % (x, peersByNameAsList[x].get('PublicKey'), peersByNameAsList[x].get('AllowedIPs'), peersByNameAsList[x].get('Name')))
     print("")
-
 
 def renamePeerInInterface(wc, selectedWGName, absWGPath):
     peersByName = OrderedDict({})
@@ -452,7 +422,6 @@ def renamePeerInInterface(wc, selectedWGName, absWGPath):
                 cprint("Invalid input", 'red')
         except ValueError:
             cprint("Input needs to be a number", 'red')
-
 
 def regeneratePeerPublicKey(wc, selectedWGName, absWGPath):
     peersByName = OrderedDict({})
@@ -516,7 +485,6 @@ def regeneratePeerPublicKey(wc, selectedWGName, absWGPath):
         except ValueError:
             cprint("Input needs to be a number", 'red')
 
-
 def main():
     # Check if program is being run as root
     if not os.geteuid() == 0:
@@ -527,15 +495,8 @@ def main():
     global prompt
     global defaultExt
     global peersDir
-    global etcConfigDir
-    global useEtcFolderForPeersOutput
     
-    defaultExt = '.conf'
     prompt = "> "
-    peersDir = "peers"
-    etcConfigDir = Path("/etc/wg-interactive")
-    wgConfPath = Path("/etc/wireguard")
-    useEtcFolderForPeersOutput = False
         
     
     version = "0.4.1-beta"
@@ -548,58 +509,11 @@ An interactive command line tool for modifying and initializing WireGuard server
 by @{twitterhandle}
 Source: {website}\n"""
 
-    print(banner)
-    
-    # Determine absolute path of script/binary
-    if getattr(sys, 'frozen', False):
-        application_path = os.path.abspath(os.path.dirname(sys.executable))
-    elif __file__:
-        application_path = os.path.abspath(os.path.dirname(__file__))
-    
-    # Create config file directory if it doesn't exist,
-    # but only if the binary has been copied to /usr/bin
-    if application_path == "/usr/bin":
-        useEtcFolderForPeersOutput = True
-        confFilePath = os.path.join(etcConfigDir, 'wg-interactive.ini')
-        os.makedirs(etcConfigDir, exist_ok=True)
-        config = configparser.ConfigParser()
-        print(f"Detected that binary is running from {colored('/usr/bin', attrs=['bold'])}, using config file")
-        if os.path.isfile(confFilePath):
-            config.read(confFilePath)
-            if 'wgconfpath' in config['main']:
-                wgConfPath = Path(config['main'].get('wgconfpath'))
-            if 'wgpeersdir' in config['main']:
-                peersDir = Path(config['main'].get('wgpeersdir'))
-                if not os.path.isabs(peersDir):
-                    cprint("wgpeersdir must be an absolute path", 'red')
-                    sys.exit(1)
-            else:
-                peersDir = Path(os.path.join(etcConfigDir, peersDir))
-        else:
-            with open(confFilePath, 'w') as f:
-                f.write("""[main]
-# wgconfpath = /etc/wireguard
-# wgpeersdir = /your/path/to/peers
-""")
-
-    # environment variable always take precedence over config file
-    if os.getenv("WGCONFPATH"):
-        wgConfPath = Path(os.getenv("WGCONFPATH"))
-    if os.getenv("WGPEERSDIR"):
-        peersDir = Path(os.getenv("WGPEERSDIR"))
-        if not os.path.isabs(peersDir):
-            cprint("WGPEERSDIR must be an absolute path", 'red')
-            sys.exit(1)
-    
-    if not os.path.isabs(peersDir):
-        peersDir = os.path.join(application_path, peersDir)
+    print(banner)        
         
-
-    wgList = []
-    
-    print(f"Using WireGuard config path {colored(wgConfPath, attrs=['bold'])}")
-    
-    wgList = getWGInterfaces(wgConfPath, defaultExt)
+    config = Config()
+    wghandler = WireGuardHandler(config)
+    interfaces = wghandler.get_interfaces()
 
     selection = 0
     validInput = False
@@ -636,10 +550,10 @@ Source: {website}\n"""
 
     print(f"\nSelected interface: {colored(absWGPath, attrs=['bold'])}")
     
-    wghandler = WireGuardHandler(selectedWGName)
+    wginterface = WireGuardInterface(selectedWGName)
     
-    wghandler.check_if_interface_is_running()
-    wghandler.check_if_wg_interface_is_enabled_on_systemd()
+    wginterface.check_if_interface_is_running()
+    wginterface.check_if_wg_interface_is_enabled_on_systemd()
     
     wc = wgconfig.WGConfig(absWGPath)
     wc.read_file()
@@ -676,7 +590,7 @@ Source: {website}\n"""
                 'text': 'Delete peer',
                 'short': 'delete'
             }]
-        if checkIfHostIsUsingSystemd():
+        if Systemd.check_if_host_is_using_systemd():
             ops.append({
                 'letter': 's',
                 'text': 'Flip enabled state for wg-quick systemd service',
@@ -709,9 +623,15 @@ Source: {website}\n"""
 if __name__ == "__main__":
     try:
         main()
-    except KeyboardInterrupt:
-        print("\nDetected keyboard interrupt. Aborting.")
-        sys.exit(1)
-    except EOFError:
-        print("\nDetected EOF. Aborting.")
+    
+    except NotImplementedError as e:
+        print(f"{e=}")
+        sys.exit(0)
+    
+    except EOFError or KeyboardInterrupt:
+        print("Detected keyboard interrupt or EOF. Aborting.")
+        sys.exit(0)
+
+    except Exception as e:
+        print(f"{e=}")
         sys.exit(1)

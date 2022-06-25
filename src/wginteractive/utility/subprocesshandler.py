@@ -6,10 +6,10 @@ class SubprocessHandler:
         pass
     
     @staticmethod
-    def invoke_command(command: str, silent: bool = False) -> tuple[int, subprocess.CompletedProcess[str]]:
+    def invoke_command(command: str, silent: bool = False, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
         if silent:
-            result = subprocess.run(command.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            result = subprocess.run(command.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, capture_output=capture_output)
         else:
-            result = subprocess.run(command.split())
+            result = subprocess.run(command.split(), capture_output=capture_output)
             
-        return result.returncode, result
+        return result
