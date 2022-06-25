@@ -9,6 +9,8 @@ from wgconfig import wgexec
 from termcolor import colored, cprint
 from pathlib import Path
 
+from importlib import metadata
+
 from .classes.wginterface import WireGuardInterface
 from .utility.wghandler import WireGuardHandler
 from .utility.systemd import Systemd
@@ -491,23 +493,11 @@ def main():
         print("You need to execute this program as root")
         sys.exit(1)
     
-    # Static vars    
-    global prompt
-    global defaultExt
-    global peersDir
+    versionstr = metadata.version("wg-interactive")
     
-    prompt = "> "
-        
-    
-    version = "0.4.1-beta"
-    twitterhandle = "das_kaesebrot"
-    website = "https://github.com/das-kaesebrot/wg-interactive"
-    
-    banner = f"""{colored(f'wg-interactive.py v{version}', attrs=['bold'])}
+    banner = f"""{colored(f'wg-interactive v{versionstr}', attrs=['bold'])}
 
-An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers.
-by @{twitterhandle}
-Source: {website}\n"""
+An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers."""
 
     print(banner)        
         
