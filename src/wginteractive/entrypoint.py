@@ -1,4 +1,4 @@
-wgi = __import__(".wg-interactive")
+from . import wginteractive as wgi
 
 def main():
     wgi.main()
