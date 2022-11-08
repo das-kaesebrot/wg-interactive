@@ -238,3 +238,7 @@ $RECYCLE.BIN/
 add-peer-interactively.sh
 test/
 !test/conf/*.conf
+
+# Added by cargo
+
+/target
