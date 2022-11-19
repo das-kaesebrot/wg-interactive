@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "02fb531d1e31e90dd6e5d3da5bfbb76f81eb59f89b332dc445827cb4f7fd1e7a"
+            "sha256": "15f7752354ff5f548ac2b792a5cd42ccde9bea731af7d27d84c8de9cb88d2205"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -86,11 +86,11 @@
         },
         "wgconfig": {
             "hashes": [
-                "sha256:55f0e17194951d9f09a23a4afc4740b8ed9b86e1f5fd812b5ca20ce254a96b46",
-                "sha256:9a6ad3652bf823aa8de138506498fb73f82059a3cdc5e10d55f515b54749fb0d"
+                "sha256:465828e5aa63d70c0d3100de01b394b705d40ae7c1ab65441d5e162ce9592deb",
+                "sha256:743bfb574548455459273ed3bbf2e2420c5edd289ee542b614bba31ea5c448d1"
             ],
             "index": "pypi",
-            "version": "==0.2.3"
+            "version": "==0.3.0"
         }
     },
     "develop": {
@@ -128,19 +128,19 @@
         },
         "pyinstaller-hooks-contrib": {
             "hashes": [
-                "sha256:2c3b81b78d26149babddb76b94442f6e0edc31e4792a694ac32a2c2e884c0630",
-                "sha256:d7b5e2a4008f9d66df5b50e90ce456ce014bcb61857eef87732f45225d6f4e77"
+                "sha256:91ecb30db757a8db8b6661d91d5df99e0998245f05f5cfaade0550922c7030a3",
+                "sha256:e06d0881e599d94dc39c6ed1917f0ad9b1858a2478b9892faac18bd48bcdc2de"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==2022.12"
+            "version": "==2022.13"
         },
         "setuptools": {
             "hashes": [
-                "sha256:d0b9a8433464d5800cbe05094acf5c6d52a91bfac9b52bcfc4d41382be5d5d31",
-                "sha256:e197a19aa8ec9722928f2206f8de752def0e4c9fc6953527360d1c36d94ddb2f"
+                "sha256:6211d2f5eddad8757bd0484923ca7c0a6302ebc4ab32ea5e94357176e0ca0840",
+                "sha256:d1eebf881c6114e51df1664bc2c9133d022f78d12d5f4f665b9191f084e2862d"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==65.5.1"
+            "version": "==65.6.0"
         },
         "typing-extensions": {
             "hashes": [
