@@ -10,10 +10,7 @@ from termcolor import colored, cprint
 from pathlib import Path
 
 from ._version import __version__
-from .classes.wginterface import WireGuardInterface
-from .utility.wghandler import WireGuardHandler
-from .utility.systemd import Systemd
-from .classes.config import Config
+from .utility.clihandler import CliHandler
 
 def getAbsWGPath (wgConfPath, selectedWGName, defaultExt):
     return Path(wgConfPath, selectedWGName + defaultExt)
@@ -498,116 +495,12 @@ def main():
 
 An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers."""
 
-    print(banner)        
-        
-    config = Config()
-    wghandler = WireGuardHandler(config)
-    interfaces = wghandler.get_interfaces()
+    print(banner)
 
-    selection = 0
-    validInput = False
-    while not validInput:
-        print("Please select an interface to modify or initialize a new interface:")
-        for x in range(len(wgList)):
-            print("[%2d] %s" % (x, wgList[x]))
-        
-        initOp = {
-                'letter': 'i',
-                'text': 'Init new interface',
-                'short': 'init'
-            }
-        print("[%2c] %s" % (initOp.get('letter'), initOp.get('text')))
-        selection = input(prompt)
-        try:
-            if selection == initOp.get('letter'):
-                validInput = True
-                
-            else:
-                selection = int(selection)
-                if (selection >= 0 ) and (selection < len(wgList)):
-                    validInput = True
-                else:
-                    cprint("Invalid input", 'red')
-        except ValueError:
-            cprint("Input needs to be a number or a single letter", 'red')
-    
-    if selection == 'i':
-        initNewInterface()
-
-    selectedWGName = wgList[selection]
-    absWGPath = getAbsWGPath(wgConfPath, selectedWGName, defaultExt)
-
-    print(f"\nSelected interface: {colored(absWGPath, attrs=['bold'])}")
-    
-    wginterface = WireGuardInterface(selectedWGName)
-    
-    wginterface.check_if_interface_is_running()
-    wginterface.check_if_wg_interface_is_enabled_on_systemd()
-    
-    wc = wgconfig.WGConfig(absWGPath)
-    wc.read_file()
-
-    ops = []
-
-    selection = 0
-    validInput = False
-    while not validInput:
-        print("Please select an operation to perform:")
-        ops = [
-            {
-                'letter': 'a',
-                'text': 'Add peer',
-                'short': 'add'
-            },
-            {
-                'letter': 'l',
-                'text': 'List all peers and return to this menu',
-                'short': 'list'
-            },
-            {
-                'letter': 'r',
-                'text': 'Rename peer',
-                'short': 'rename'
-            },
-            {
-                'letter': 'k',
-                'text': 'Generate new keypair for peer',
-                'short': 'keypair'
-            },
-            {
-                'letter': 'd',
-                'text': 'Delete peer',
-                'short': 'delete'
-            }]
-        if Systemd.check_if_host_is_using_systemd():
-            ops.append({
-                'letter': 's',
-                'text': 'Flip enabled state for wg-quick systemd service',
-                'short': 'systemd-enabled'
-            })
-        for x in range(len(ops)):
-            print("[%c] %s" % (ops[x].get('letter'), ops[x].get('text')))
-        selection = input(prompt)
-        for operation in ops:
-            if selection == operation.get('letter'):
-                selectedOperation = operation
-                validInput = True
-        if not validInput:
-            cprint("Invalid input", 'red')
-        elif validInput and selectedOperation.get('short') == 'list':
-            print(f"Selected operation: {colored(selectedOperation.get('short'), attrs=['bold'])}\n")
-            listPeersFromInterface(wc, selectedWGName)
-            validInput = False
+    handler = CliHandler()
+    handler.handle()
 
     
-    print(f"Selected operation: {colored(selectedOperation.get('short'), attrs=['bold'])}\n")
-
-    if selectedOperation.get('short') == "add": addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath)
-    elif selectedOperation.get('short') == 'rename': renamePeerInInterface(wc, selectedWGName, absWGPath)
-    elif selectedOperation.get('short') == 'keypair': regeneratePeerPublicKey(wc, selectedWGName, absWGPath)
-    elif selectedOperation.get('short') == 'delete': deletePeerFromInterface(wc, selectedWGName, absWGPath)
-    elif selectedOperation.get('short') == 'systemd-enabled': Systemd.flip_enabled_status(selectedWGName)
-
 
 if __name__ == "__main__":
     try:
