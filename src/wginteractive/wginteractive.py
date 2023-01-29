@@ -9,8 +9,7 @@ from wgconfig import wgexec
 from termcolor import colored, cprint
 from pathlib import Path
 
-from importlib import metadata
-
+from ._version import __version__
 from .classes.wginterface import WireGuardInterface
 from .utility.wghandler import WireGuardHandler
 from .utility.systemd import Systemd
@@ -493,7 +492,7 @@ def main():
         print("You need to execute this program as root")
         sys.exit(1)
     
-    versionstr = metadata.version("wg-interactive")
+    versionstr = __version__
     
     banner = f"""{colored(f'wg-interactive v{versionstr}', attrs=['bold'])}
 
