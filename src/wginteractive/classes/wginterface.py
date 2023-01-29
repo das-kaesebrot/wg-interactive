@@ -19,7 +19,7 @@ class WireGuardInterface:
             return True
         return False
             
-    def check_if_wg_interface_is_enabled_on_systemd(self) -> bool | None:
+    def check_if_wg_interface_is_enabled_on_systemd(self) -> bool:
         return Systemd.check_if_wg_interface_is_enabled(self.ifacename)
         
     def reload_if_interface_is_running(self):                
