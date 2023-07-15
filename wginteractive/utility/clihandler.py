@@ -247,3 +247,19 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
     def _print_list_of_options(opts: list) -> None:
         for index, value in enumerate(opts):
             print("[%i] %s" % (index, value))
+            
+    
+    def _print_interface_status(self, iface: WireGuardInterface) -> None:
+        if iface.is_running():
+            print(f"{colored(iface.ifacename, attrs=['bold'])} is {colored('active', color='green')}. Auto reload after changes enabled.")
+        else:
+            print(f"{colored(iface.ifacename, attrs=['bold'])} is {colored('not active', color='red')}. Skipping auto reload after changes are made.")
+        
+        if (self.USE_SYSTEMD):
+            if iface.is_enabled_on_systemd():
+                print(f"Service {colored(f'wg-quick@{iface.ifacename}', attrs=['bold'])} is {colored('enabled', color='green')}")
+            else:
+                print(f"Service {colored(f'wg-quick@{iface.ifacename}', attrs=['bold'])} is {colored('not enabled', color='red')}")
+        else:
+            print(f"Seems like host doesn't use systemd, skipping check for service")
+            
