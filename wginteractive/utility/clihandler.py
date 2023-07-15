@@ -175,7 +175,7 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
         
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
         clientside_endpoint_port = self._get_endpoint_port_interactively(self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get('ListenPort')))
-        clientside_endpoint_host = None
+        clientside_endpoint_host = self._get_endpoint_host_interactively(self.TEXT_CLIENT_ENDPOINT_HOST, self._get_recommended_endpoint_hosts())
         
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS)
         pass
@@ -206,6 +206,29 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
                 logging.getLogger(__name__).exception("Invalid input")
                 print("Please try again!\n")
                 
+    
+    @staticmethod
+    def _get_endpoint_host_interactively(text: str, suggested_defaults: list[str]) -> str:
+        print(text)
+
+        while True:
+            CliHandler._print_list_of_options(suggested_defaults)
+
+            selection = input(CliHandler.PROMPT)
+            
+            try:
+                selection = int(selection)
+                
+                retval = suggested_defaults[selection]
+            
+                print(f"Selected endpoint host: {retval}\n")
+                
+                return retval
+                
+            except ValueError as e:
+                logging.getLogger(__name__).exception("Invalid input")
+                print("Please try again!\n")
+
     
     @staticmethod
     def _get_ip_interfaces_interactively(text: str, suggested_defaults: list[IPv4Interface | IPv6Interface]) -> list[(IPv4Interface | IPv6Interface)]:
