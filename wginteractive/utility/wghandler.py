@@ -24,6 +24,6 @@ class WireGuardHandler:
             
             _.sort()
             for config in _:
-                self.interfaces[config] = WireGuardInterface(config)
+                self.interfaces[config] = WireGuardInterface(config, self._config.wireguard_conf_dir)
         
         return self.interfaces

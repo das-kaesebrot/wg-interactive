@@ -1,5 +1,7 @@
-from subprocess import CompletedProcess
 import tempfile
+import wgconfig
+import os
+from subprocess import CompletedProcess
 
 from .wgpeer import WgInteractivePeer
 from ..utility.systemd import Systemd
@@ -13,8 +15,11 @@ class WireGuardInterface:
     CMD_WG_STRIP = "strip"
     CMD_WG_SETCONF = "setconf" # requires an additional filename argument or piping into the command
     
-    def __init__(self, ifacename: str) -> None:
+    iface: wgconfig.WGConfig
+    
+    def __init__(self, ifacename: str, wireguard_basepath: str) -> None:
         self.ifacename = ifacename
+        self.iface = wgconfig.WGConfig(os.path.join(wireguard_basepath, ifacename))
     
     def check_if_interface_is_running(self) -> bool:        
         if self._invoke_wg_command_on_iface(self.CMD_WG_SHOW, True) == 0:
