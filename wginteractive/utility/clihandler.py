@@ -152,6 +152,14 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
                 return selection
             
             print("Invalid input, please try again\n")
+        
+        
+    def _get_new_peer_interactively(self, iface: WireGuardInterface):
+        clientside_endpoint_port = self._get_endpoint_port_interactively(int(iface.iface.get('ListenPort')))
+        clientside_endpoint_host = None
+        
+        serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS)
+        pass
     
     @staticmethod
     def _get_endpoint_port_interactively(text: str, suggested_default: int) -> int:
