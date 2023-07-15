@@ -177,6 +177,16 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
         clientside_endpoint_port = self._get_endpoint_port_interactively(self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get('ListenPort')))
         clientside_endpoint_host = self._get_endpoint_host_interactively(self.TEXT_CLIENT_ENDPOINT_HOST, ServerInfo._get_recommended_endpoint_hosts())
         
+        # wrap host in square brackets if it's an IPv6 address
+        try:            
+            if ipaddress.ip_address(clientside_endpoint_host).version == 6:
+                clientside_endpoint_host = f"[{clientside_endpoint_host}]"
+            
+        except ValueError:
+            pass
+        
+        clientside_endpoint = f"{clientside_endpoint_host}:{clientside_endpoint_port}"
+        
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS)
         pass
     
