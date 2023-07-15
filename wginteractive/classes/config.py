@@ -26,21 +26,21 @@ class Config:
             
             if 'wgconfpath' in config['main']:
                 self.wireguard_conf_dir = config['main'].get('wgconfpath').rstrip("/")
-                
-                if os.getenv("WGCONFPATH"):
-                    self.wireguard_conf_dir = os.getenv("WGCONFPATH").rstrip("/")
-                
-                if not os.path.isabs(self.wireguard_conf_dir):
-                    raise ValueError(f"Value of 'wgconfpath' must be absolute, given value: '{self.wireguard_conf_dir}'")
+            
+            if os.getenv("WGCONFPATH"):
+                self.wireguard_conf_dir = os.getenv("WGCONFPATH").rstrip("/")
+            
+            if not os.path.isabs(self.wireguard_conf_dir):
+                raise ValueError(f"Value of 'wgconfpath' must be absolute, given value: '{self.wireguard_conf_dir}'")
             
             if 'wgpeersdir' in config['main']:
                 self.peers_output_dir = config['main'].get('wgpeersdir').rstrip("/")
                 
-                if os.getenv("WGPEERSDIR"):
-                    self.peers_output_dir = os.getenv("WGPEERSDIR").rstrip("/")
-                
-                if not os.path.isabs(self.peers_output_dir):
-                    raise ValueError(f"Value of 'wgpeersdir' must be absolute, given value: '{self.wireguard_conf_dir}'")
+            if os.getenv("WGPEERSDIR"):
+                self.peers_output_dir = os.getenv("WGPEERSDIR").rstrip("/")
+            
+            if not os.path.isabs(self.peers_output_dir):
+                raise ValueError(f"Value of 'wgpeersdir' must be absolute, given value: '{self.wireguard_conf_dir}'")
             
             self._logger.debug(f"{self.wireguard_conf_dir=}")
             self._logger.debug(f"{self.peers_output_dir=}")
