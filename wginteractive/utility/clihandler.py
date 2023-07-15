@@ -1,4 +1,7 @@
+import ipaddress
 import readline
+import logging
+from ipaddress import IPv4Interface, IPv6Interface
 from termcolor import colored
 
 from ..classes.config import Config
@@ -101,8 +104,7 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
         interface_action = self._get_action_for_interface_and_validate()
         
         if interface_action == self.ACTION_ADD:
-            # addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath)
-            pass
+            self._get_new_peer_interactively(wginterface)
             
         elif interface_action == self.ACTION_RENAME:
             # renamePeerInInterface(wc, selectedWGName, absWGPath)
