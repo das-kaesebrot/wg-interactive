@@ -7,6 +7,7 @@ from termcolor import colored
 from ..classes.config import Config
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
 from ..utility.systemd import Systemd
+from ..utility.serverinfo import ServerInfo
 
 class CliHandler:
     USE_SYSTEMD: bool = False
@@ -248,6 +249,20 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
         for index, value in enumerate(opts):
             print("[%i] %s" % (index, value))
             
+    @staticmethod
+    def _get_recommended_endpoint_hosts() -> list[str]:
+        retlist = []
+        
+        hostname = ServerInfo.get_hostname()
+        public_ipv4 = ServerInfo.get_public_ipv4()
+        public_ipv6 = ServerInfo.get_public_ipv6()
+        
+        if hostname: retlist.append(hostname)
+        if public_ipv4: retlist.append(public_ipv4)
+        if public_ipv6: retlist.append(public_ipv6)
+        
+        return retlist
+        
     
     def _print_interface_status(self, iface: WireGuardInterface) -> None:
         if iface.is_running():
