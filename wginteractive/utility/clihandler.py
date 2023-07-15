@@ -1,4 +1,5 @@
 import readline
+from termcolor import colored
 
 from ..classes.config import Config
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
@@ -51,6 +52,18 @@ class CliHandler:
                 'desc': 'Flip enabled state for wg-quick systemd service',
             }
         }
+    
+    TEXT_SERVER_ALLOWEDIPS = f"""{colored('AllowedIPs (Server config)', attrs=['bold'])}
+Please select a recommended address or give your own (comma-separated for multiple ranges):"""
+
+    TEXT_CLIENT_ADDRESS = f"""{colored('Address (Client config)', attrs=['bold'])}
+For the peer sided config - defines the primary IP and subnet for the client.
+Please select a recommended address or give your own (comma-separated for multiple ranges):"""
+    
+    TEXT_CLIENT_ALLOWEDIPS = f"""{colored('AllowedIPs (Client config)', attrs=['bold'])}
+For the peer sided config - defines which network ranges the peer is allowed to access.
+Be aware that a user may change this in their config at any time.
+Please select a range of AllowedIPs or give your own (comma-separated for multiple ranges):"""
 
     _wghandler: WireGuardHandler
     _wginterfaces: dict[str, WireGuardInterface]
