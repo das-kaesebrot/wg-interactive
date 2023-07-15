@@ -75,10 +75,11 @@ class CliHandler:
 
         if (iface_or_init == self.ACTION_INIT_NEW_IFACE):
             raise NotImplementedError("Not supported yet")
-
-        print(f"Selected interface: {iface_or_init}")
         
-        wginterface = self._wginterfaces.get(iface_or_init)
+        iface_or_init = int(iface_or_init)
+        
+        wginterface_key = list(self._wginterfaces)[int(iface_or_init)]
+        wginterface = self._wginterfaces.get(wginterface_key)
         wginterface.check_if_interface_is_running()
         if (self.USE_SYSTEMD): wginterface.check_if_wg_interface_is_enabled_on_systemd()
         
