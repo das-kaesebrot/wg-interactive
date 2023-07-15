@@ -1,6 +1,7 @@
 import sys
 import os
 import wgconfig
+import logging
 import ipaddress
 import netifaces
 import validators
@@ -483,11 +484,14 @@ def regeneratePeerPublicKey(wc, selectedWGName, absWGPath):
         except ValueError:
             cprint("Input needs to be a number", 'red')
 
-def main():    
+def main():
+    logging.basicConfig(format='[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s', level=logging.DEBUG) 
+    logger = logging.getLogger(__name__)
+    
     try:
         # Check if program is being run as root
         if not os.geteuid() == 0:
-            print("You need to execute this program as root")
+            logger.error("Has to run as root")
             sys.exit(1)
 
         versionstr = __version__
@@ -503,15 +507,16 @@ An interactive command line tool for modifying and initializing WireGuard server
         handler.handle()
     
     except NotImplementedError as e:
-        print(f"{e=}")
+        logger.exception("Not implemented yet")
         sys.exit(0)
     
     except EOFError or KeyboardInterrupt:
-        print("Detected keyboard interrupt or EOF. Aborting.")
+        print()
+        logger.info("Detected keyboard interrupt or EOF. Aborting.")
         sys.exit(0)
 
     except Exception as e:
-        print(f"{e=}")
+        logger.exception("Unhandled exception occured")
         sys.exit(1)
         
 
