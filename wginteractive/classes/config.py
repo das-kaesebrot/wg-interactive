@@ -1,12 +1,17 @@
 import configparser
 import os
+import logging
 
 class Config:
     
     peers_output_dir = "/var/lib/wginteractive/output"
     wireguard_conf_dir = "/etc/wireguard"
     
+    _logger: logging.Logger
+    
     def __init__(self, filename: str = "wg-interactive.ini", config_dir = "/etc/wg-interactive") -> None:
+        self._logger = logging.getLogger(__name__)
+        
         self._filename = filename
         self._config_dir = config_dir.rstrip("/")        
         self._filepath = os.path.join(self._config_dir, self._filename)
@@ -36,6 +41,9 @@ class Config:
                 
                 if not os.path.isabs(self.peers_output_dir):
                     raise ValueError(f"Value of 'wgpeersdir' must be absolute, given value: '{self.wireguard_conf_dir}'")
+            
+            self._logger.debug(f"{self.wireguard_conf_dir=}")
+            self._logger.debug(f"{self.peers_output_dir=}")
             
         else:
             self._create_config()
