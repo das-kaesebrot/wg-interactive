@@ -152,6 +152,45 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
                 return selection
             
             print("Invalid input, please try again\n")
+    @staticmethod
+    def _get_ip_interfaces_interactively(text: str, suggested_defaults: list[IPv4Interface | IPv6Interface]) -> list[(IPv4Interface | IPv6Interface)]:
+        print(text)
+
+        while True:
+            CliHandler._print_list_of_options(suggested_defaults)
+
+            selection = input(CliHandler.PROMPT)
+            
+            try:
+                selection = int(selection)
+                
+                retval = [suggested_defaults[selection]]
+                
+                print(f"Selected interface(s): {retval}\n")
+                
+                return retval
+                
+            except ValueError as e:
+                pass
+            
+            
+            try:
+                selection_arr = selection.split(',')
+                
+                retval = []
+                
+                for entry in selection_arr:
+                    retval.append(ipaddress.ip_interface(entry.strip()))
+                
+                print(f"Selected interface(s): {retval}\n")
+                
+                return retval
+                
+            except ValueError as e:
+                pass
+            
+            print("Invalid input, please try again\n")
+           
     @staticmethod 
     def _print_list_of_options(opts: list) -> None:
         for index, value in enumerate(opts):
