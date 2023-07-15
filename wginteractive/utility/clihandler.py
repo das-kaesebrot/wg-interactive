@@ -1,3 +1,5 @@
+import readline
+
 from ..classes.config import Config
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
 
