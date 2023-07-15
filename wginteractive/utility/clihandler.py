@@ -85,11 +85,26 @@ class CliHandler:
         
         interface_action = self._get_action_for_interface_and_validate()
         
-        if interface_action == self.ACTION_ADD: addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath)
-        elif interface_action == self.ACTION_RENAME: renamePeerInInterface(wc, selectedWGName, absWGPath)
-        elif interface_action == self.ACTION_NEWKEY_CLIENT: regeneratePeerPublicKey(wc, selectedWGName, absWGPath)
-        elif interface_action == self.ACTION_DELETE: deletePeerFromInterface(wc, selectedWGName, absWGPath)
-        elif interface_action == self.ACTION_FLIP_SYSTEMD: Systemd.flip_enabled_status(selectedWGName)
+        if interface_action == self.ACTION_ADD:
+            # addNewPeerToInterface(wc, selectedWGName, absWGPath, wgConfPath)
+            pass
+            
+        elif interface_action == self.ACTION_RENAME:
+            # renamePeerInInterface(wc, selectedWGName, absWGPath)
+            pass
+            
+        elif interface_action == self.ACTION_NEWKEY_CLIENT:
+            # regeneratePeerPublicKey(wc, selectedWGName, absWGPath)
+            pass
+        
+        elif interface_action == self.ACTION_DELETE:
+            # deletePeerFromInterface(wc, selectedWGName, absWGPath)
+            pass
+        
+        elif interface_action == self.ACTION_FLIP_SYSTEMD:
+            # Systemd.flip_enabled_status(selectedWGName)
+            pass
+    
         
     def _get_initial_interface_or_action_and_validate(self) -> str:
 
