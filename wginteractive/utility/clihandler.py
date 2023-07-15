@@ -61,6 +61,7 @@ class CliHandler:
         counter = 0
         for iface in self._wginterfaces.keys():
             self.ACTIONS_MENU_ROOT[str(counter)] = { 'desc' :iface }
+            counter += 1
 
         self.USE_SYSTEMD = is_using_systemd
 
