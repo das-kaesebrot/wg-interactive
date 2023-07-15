@@ -82,6 +82,9 @@ For the peer sided config - defines which network ranges the peer is allowed to 
 Be aware that a user may change this in their config at any time.
 Please select a range of AllowedIPs or give your own (comma-separated for multiple ranges):"""
 
+    TEXT_SERVER_PEER_NAME = f"""{colored('Peer name', attrs=['bold'])}
+Please input the peer's name:"""
+
     _wghandler: WireGuardHandler
     _wginterfaces: dict[str, WireGuardInterface]
     
@@ -187,8 +190,15 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
         
         clientside_endpoint = f"{clientside_endpoint_host}:{clientside_endpoint_port}"
         
+        
+        serverside_peername = self._get_str_interactively(self.TEXT_SERVER_PEER_NAME)
+        
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS)
-        pass
+    @staticmethod
+    def _get_str_interactively(text: str) -> str:
+        print(text)
+        selection = input(CliHandler.PROMPT)
+        return selection.strip()
     
     @staticmethod
     def _get_endpoint_port_interactively(text: str, suggested_default: int) -> int:
