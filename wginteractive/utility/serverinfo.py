@@ -58,3 +58,16 @@ class ServerInfo:
         
         return None
     
+    @staticmethod
+    def _get_recommended_endpoint_hosts() -> list[str]:
+        retlist = []
+        
+        hostname = ServerInfo.get_hostname()
+        public_ipv4 = ServerInfo.get_public_ipv4()
+        public_ipv6 = ServerInfo.get_public_ipv6()
+        
+        if hostname: retlist.append(hostname)
+        if public_ipv4: retlist.append(public_ipv4.compressed)
+        if public_ipv6: retlist.append(public_ipv6.compressed)
+        
+        return retlist

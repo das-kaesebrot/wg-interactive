@@ -175,7 +175,7 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
         
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
         clientside_endpoint_port = self._get_endpoint_port_interactively(self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get('ListenPort')))
-        clientside_endpoint_host = self._get_endpoint_host_interactively(self.TEXT_CLIENT_ENDPOINT_HOST, self._get_recommended_endpoint_hosts())
+        clientside_endpoint_host = self._get_endpoint_host_interactively(self.TEXT_CLIENT_ENDPOINT_HOST, ServerInfo._get_recommended_endpoint_hosts())
         
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS)
         pass
@@ -273,21 +273,7 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
     def _print_list_of_options(opts: list) -> None:
         for index, value in enumerate(opts):
             print("[%i] %s" % (index, value))
-            
-    @staticmethod
-    def _get_recommended_endpoint_hosts() -> list[str]:
-        retlist = []
-        
-        hostname = ServerInfo.get_hostname()
-        public_ipv4 = ServerInfo.get_public_ipv4()
-        public_ipv6 = ServerInfo.get_public_ipv6()
-        
-        if hostname: retlist.append(hostname)
-        if public_ipv4: retlist.append(public_ipv4)
-        if public_ipv6: retlist.append(public_ipv6)
-        
-        return retlist
-        
+                   
     
     def _print_interface_status(self, iface: WireGuardInterface) -> None:
         if iface.is_running():
