@@ -96,7 +96,7 @@ class CliHandler:
         print("Please select an interface to modify or initialize a new interface:")
         
         while True:
-            for k, v in self.ACTIONS_MENU_ROOT:
+            for k, v in self.ACTIONS_MENU_ROOT.items():
                 print("[%c] %s" % (k, v.get('desc')))
                 
             selection = input(CliHandler.PROMPT)
@@ -112,7 +112,7 @@ class CliHandler:
         print("Please select an operation to perform:")
 
         while True:
-            for k, v in self.ACTIONS_MENU:
+            for k, v in self.ACTIONS_MENU.items():
                 print("[%c] %s" % (k, v.get('desc')))
 
             selection = input(CliHandler.PROMPT)
