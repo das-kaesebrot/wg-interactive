@@ -56,6 +56,18 @@ class CliHandler:
             }
         }
     
+    
+    TEXT_CLIENT_ENDPOINT_PORT = f"""{colored('Endpoint port', attrs=['bold'])}
+Please select an endpoint port to use or input your own:"""
+    
+    TEXT_CLIENT_ENDPOINT_HOST = f"""{colored('Endpoint host', attrs=['bold'])}
+Since it is not required for a WireGuard server to read its own endpoint domain/IP from the config file, this script needs to provide that value.
+Please select an endpoint host (this server's IP or a FQDN pointing to it) to use in the peer's config file or input your own.
+Examples for valid own inputs:
+vpn.example.com
+11.22.33.44
+Please don't append the port, this will be done automatically!"""
+    
     TEXT_SERVER_ALLOWEDIPS = f"""{colored('AllowedIPs (Server config)', attrs=['bold'])}
 Please select a recommended address or give your own (comma-separated for multiple ranges):"""
 
