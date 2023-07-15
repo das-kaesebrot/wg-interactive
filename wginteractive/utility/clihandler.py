@@ -138,3 +138,6 @@ class CliHandler:
             
             print("Invalid input, please try again\n")
             
+
+    def _get_new_peer_interactively(self):
+        pass
