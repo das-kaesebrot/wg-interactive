@@ -483,28 +483,24 @@ def regeneratePeerPublicKey(wc, selectedWGName, absWGPath):
         except ValueError:
             cprint("Input needs to be a number", 'red')
 
-def main():
-    # Check if program is being run as root
-    if not os.geteuid() == 0:
-        print("You need to execute this program as root")
-        sys.exit(1)
-    
-    versionstr = __version__
-    
-    banner = f"""{colored(f'wg-interactive v{versionstr}', attrs=['bold'])}
-
-An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers."""
-
-    print(banner)
-
-    handler = CliHandler()
-    handler.handle()
-
-    
-
-if __name__ == "__main__":
+def main():    
     try:
-        main()
+        # Check if program is being run as root
+        if not os.geteuid() == 0:
+            print("You need to execute this program as root")
+            sys.exit(1)
+
+        versionstr = __version__
+
+        banner = f"""{colored(f'wg-interactive v{versionstr}', attrs=['bold'])}
+
+An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers.
+"""
+
+        print(banner)
+
+        handler = CliHandler()
+        handler.handle()
     
     except NotImplementedError as e:
         print(f"{e=}")
@@ -517,3 +513,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"{e=}")
         sys.exit(1)
+        
+
+if __name__ == "__main__":
+    main()
