@@ -174,7 +174,7 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
         
         
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
-        clientside_endpoint_port = self._get_endpoint_port_interactively(int(iface.iface.get('ListenPort')))
+        clientside_endpoint_port = self._get_endpoint_port_interactively(self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get('ListenPort')))
         clientside_endpoint_host = None
         
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS)
