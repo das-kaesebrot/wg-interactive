@@ -6,6 +6,7 @@ from termcolor import colored
 
 from ..classes.config import Config
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
+from ..utility.systemd import Systemd
 
 class CliHandler:
     USE_SYSTEMD: bool = False
@@ -83,7 +84,8 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
     _wghandler: WireGuardHandler
     _wginterfaces: dict[str, WireGuardInterface]
     
-    def __init__(self, is_using_systemd = False) -> None:
+    
+    def __init__(self) -> None:
         config = Config()
         self._wghandler = WireGuardHandler(config)
         self._wginterfaces = self._wghandler.get_interfaces()
@@ -93,7 +95,7 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
             self.ACTIONS_MENU_ROOT[str(counter)] = { 'desc' :iface }
             counter += 1
 
-        self.USE_SYSTEMD = is_using_systemd
+        self.USE_SYSTEMD = Systemd.check_if_host_is_using_systemd()
 
         if not self.USE_SYSTEMD:
             self.ACTIONS_MENU.pop(CliHandler.ACTION_FLIP_SYSTEMD)
@@ -110,8 +112,8 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
         
         wginterface_key = list(self._wginterfaces)[int(iface_or_init)]
         wginterface = self._wginterfaces.get(wginterface_key)
-        wginterface.check_if_interface_is_running()
-        if (self.USE_SYSTEMD): wginterface.check_if_wg_interface_is_enabled_on_systemd()
+        
+        self._print_interface_status(wginterface)
         
         interface_action = self._get_action_for_interface_and_validate()
         
