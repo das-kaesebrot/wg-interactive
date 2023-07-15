@@ -190,10 +190,16 @@ Please input the peer's name:"""
         
         clientside_endpoint = f"{clientside_endpoint_host}:{clientside_endpoint_port}"
         
+        print(f"Selected endpoint: {colored(clientside_endpoint, attrs=['bold'])}\n")
         
         serverside_peername = self._get_str_interactively(self.TEXT_SERVER_PEER_NAME)
         
+        # log peer file path
+        # Peer file will be written to: /etc/wg-interactive/peers/test/test.conf
+        
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS)
+        
+    
     @staticmethod
     def _get_str_interactively(text: str) -> str:
         print(text)
@@ -217,8 +223,6 @@ Please input the peer's name:"""
             
                 if selection == 0:
                     selection = suggested_default
-            
-                print(f"Selected port: {selection}\n")
                 
                 return selection
                 
@@ -240,8 +244,6 @@ Please input the peer's name:"""
                 selection = int(selection)
                 
                 retval = suggested_defaults[selection]
-            
-                print(f"Selected endpoint host: {retval}\n")
                 
                 return retval
                 
