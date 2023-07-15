@@ -9,8 +9,5 @@ termcolor = "==2.1.0"
 netifaces = "==0.11.0"
 validators = "==0.18.2"
 
-[dev-packages]
-pyinstaller = "*"
-
 [requires]
-python_version = "3.7"
+python_version = "3"
