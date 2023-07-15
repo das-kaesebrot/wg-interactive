@@ -152,7 +152,7 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
                 return selection
             
             print("Invalid input, please try again\n")
-            
-
-    def _get_new_peer_interactively(self):
-        pass
+    @staticmethod 
+    def _print_list_of_options(opts: list) -> None:
+        for index, value in enumerate(opts):
+            print("[%i] %s" % (index, value))
