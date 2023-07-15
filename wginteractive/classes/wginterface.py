@@ -1,5 +1,7 @@
 from subprocess import CompletedProcess
 import tempfile
+
+from .wgpeer import WgInteractivePeer
 from ..utility.systemd import Systemd
 from ..utility.subprocesshandler import SubprocessHandler
 
@@ -29,8 +31,10 @@ class WireGuardInterface:
                 tf.write(result.stdout.decode("utf-8"))
                 tf.seek(0)
                 self._invoke_wg_command_on_iface(self.CMD_WG_SETCONF, filename=tf.name)
+                
+    def add_peer_to_interface(self, peer: WgInteractivePeer):
+        pass
 
-    
     def _invoke_wg_command_on_iface(self, command: str, filename: str = None, silent: bool = False, capture_output: bool = False) -> CompletedProcess:
         return SubprocessHandler.invoke_command(f"wg {command} {self.ifacename}{' ' + filename if filename else ''}", silent, capture_output)
     
