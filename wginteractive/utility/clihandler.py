@@ -152,6 +152,34 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
                 return selection
             
             print("Invalid input, please try again\n")
+    
+    @staticmethod
+    def _get_endpoint_port_interactively(text: str, suggested_default: int) -> int:
+        print(text)
+
+        while True:
+            CliHandler._print_list_of_options([suggested_default])
+
+            selection = input(CliHandler.PROMPT)
+            
+            try:
+                selection = int(selection)
+                
+                if selection < 0 or selection > 65535:
+                    raise ValueError("Port value out of range! Must be between 0 and 65535")
+            
+                if selection == 0:
+                    selection = suggested_default
+            
+                print(f"Selected port: {selection}\n")
+                
+                return selection
+                
+            except ValueError as e:
+                logging.getLogger(__name__).exception("Invalid input")
+                print("Please try again!\n")
+                
+    
     @staticmethod
     def _get_ip_interfaces_interactively(text: str, suggested_defaults: list[IPv4Interface | IPv6Interface]) -> list[(IPv4Interface | IPv6Interface)]:
         print(text)
