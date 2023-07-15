@@ -85,8 +85,10 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
     _wghandler: WireGuardHandler
     _wginterfaces: dict[str, WireGuardInterface]
     
+    _logger: logging.Logger
     
     def __init__(self) -> None:
+        self._logger = logging.getLogger(__name__)
         config = Config()
         self._wghandler = WireGuardHandler(config)
         self._wginterfaces = self._wghandler.get_interfaces()
