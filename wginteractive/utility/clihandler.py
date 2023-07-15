@@ -120,7 +120,7 @@ class CliHandler:
                 print(f"Selected operation/interface: {self.ACTIONS_MENU_ROOT.get(selection).get('desc')}\n")
                 return selection
 
-            print("Invalid input")
+            print("Invalid input, please try again\n")
 
     def _get_action_for_interface_and_validate(self) -> str:
 
@@ -136,4 +136,5 @@ class CliHandler:
                 print(f"Selected operation: {self.ACTIONS_MENU.get(selection).get('desc')}\n")
                 return selection
             
-            print("Invalid input")
+            print("Invalid input, please try again\n")
+            
