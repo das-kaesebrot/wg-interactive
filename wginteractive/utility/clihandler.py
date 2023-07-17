@@ -1,4 +1,5 @@
 import ipaddress
+import os
 import readline
 import logging
 import ipaddress
@@ -93,8 +94,8 @@ Please input the peer's name:"""
     
     def __init__(self) -> None:
         self._logger = logging.getLogger(__name__)
-        config = Config()
-        self._wghandler = WireGuardHandler(config)
+        self.config = Config()
+        self._wghandler = WireGuardHandler(self.config)
         self._wginterfaces = self._wghandler.get_interfaces()
         
         counter = 0
@@ -195,8 +196,9 @@ Please input the peer's name:"""
         
         serverside_peername = self._get_str_interactively(self.TEXT_SERVER_PEER_NAME)
         
-        # log peer file path
-        # Peer file will be written to: /etc/wg-interactive/peers/test/test.conf
+        peerfile_path = os.path.join(self.config.peers_output_dir, iface.ifacename, serverside_peername + ".conf")
+        
+        print(f"Peer file will be written to: {peerfile_path}\n")
         
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS, self._get_next_free_ips(iface))
         
