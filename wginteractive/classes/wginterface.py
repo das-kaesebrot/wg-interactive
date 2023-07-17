@@ -1,7 +1,9 @@
+from ipaddress import IPv4Interface
 import tempfile
 import wgconfig
 import os
 from subprocess import CompletedProcess
+import logging
 
 from .wgpeer import WgInteractivePeer
 from ..utility.systemd import Systemd
@@ -23,8 +25,9 @@ class WireGuardInterface:
         self.iface_conf_path = os.path.join(wireguard_basepath, ifacename + ".conf")
         self.iface = wgconfig.WGConfig(self.iface_conf_path)
         self.iface.read_file()
+        self._logger = logging.getLogger(self.ifacename)
     
-    def is_running(self) -> bool:        
+    def is_running(self) -> bool:
         if self._invoke_wg_command_on_iface(self.CMD_WG_SHOW, filename=self.iface_conf_path, capture_output=True) == 0:
             return True
         return False
