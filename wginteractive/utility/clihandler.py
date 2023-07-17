@@ -1,6 +1,7 @@
 import ipaddress
 import readline
 import logging
+import ipaddress
 from ipaddress import IPv4Interface, IPv6Interface
 from termcolor import colored
 
@@ -197,7 +198,7 @@ Please input the peer's name:"""
         # log peer file path
         # Peer file will be written to: /etc/wg-interactive/peers/test/test.conf
         
-        serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS)
+        serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS, self._get_next_free_ips(iface))
         
     
     @staticmethod
@@ -310,4 +311,60 @@ Please input the peer's name:"""
                 print(f"Service {colored(f'wg-quick@{iface.ifacename}', attrs=['bold'])} is {colored('not enabled', color='red')}")
         else:
             print(f"Seems like host doesn't use systemd, skipping check for service")
+        
+    @staticmethod
+    def _get_next_free_ips(iface: WireGuardInterface) -> list[IPv4Interface | IPv6Interface]:
+        # 255.255.255.255 as an int
+        netmask_v4 = ipaddress.ip_address((2 ** 32)  - 1)
+        netmask_v6 = ipaddress.ip_address((2 ** 128) - 1)
+        
+        free_ips = []
+        
+        server_addresses = iface.iface.interface.get("Address")
+        
+        if isinstance(server_addresses, str):
+            server_addresses = [server_addresses]
             
+        for server_address in server_addresses:
+            server_address = ipaddress.ip_interface(server_address)
+            
+            server_network = server_address.network
+            possible_ips = list(server_network.hosts())
+            
+            possible_ips.remove(server_address.ip)
+            
+            for peer in iface.iface.peers.values():
+                allowed_ips = peer.get("AllowedIPs")
+                
+                if not allowed_ips:
+                    continue
+                
+                if isinstance(allowed_ips, str):
+                    allowed_ips = [allowed_ips]
+                
+                for allowed_ip in allowed_ips:
+                    try:
+                        ip = ipaddress.ip_interface(allowed_ip).ip
+                        possible_ips.remove(ip)
+                            
+                    except ValueError:
+                        continue
+            
+            if len(possible_ips) != 0:
+                for ip in possible_ips:
+                    if not (
+                            ip.is_reserved
+                        or ip.is_multicast
+                        or ip.is_link_local
+                        or ip.is_loopback
+                    ):
+                        netmask = netmask_v4
+                        if (ip.version == 6):
+                            netmask_v6
+                              
+                        new_ip = ipaddress.ip_interface(f"{ip}/{netmask}")
+                        free_ips.append(new_ip)
+                        break
+                        
+        return free_ips
+    
