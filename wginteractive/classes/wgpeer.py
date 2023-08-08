@@ -1,5 +1,6 @@
 
 from ipaddress import IPv4Interface, IPv6Interface
+from wgconfig import wgexec
 import ipaddress
 import logging
 
@@ -7,15 +8,23 @@ import logging
 class WgInteractivePeer:
     """Class that represents a single wireguard peer (from the server's point of view)"""
     
-    name: str = ""
-    public_key: str = ""
-    allowed_ips: list[(IPv4Interface | IPv6Interface)] = []
+    name: str = "Unnamed Peer"
+    server_allowed_ips: list[(IPv4Interface | IPv6Interface)] = []
+    client_allowed_ips: list[(IPv4Interface | IPv6Interface)] = []
+    primary_ip: IPv4Interface | IPv6Interface = None
+    private_key: str = None
+    public_key: str = None
     
     _logger: logging.Logger
     
-    def __init__(self) -> None:
+    def __init__(self, name: str = None) -> None:
+        if name:
+            self.name = name
+            
         self._logger = logging.getLogger(__name__)
-        pass
+        
+        self.private_key, self.public_key = wgexec.generate_keypair()
+        
     
     def set_allowed_ips_from_string(self, list_of_interfaces: str):
         allowed_ips = []
