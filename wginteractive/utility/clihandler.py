@@ -388,6 +388,8 @@ Please input the peer's name:"""
         netmask_v4 = ipaddress.ip_address((2 ** 32)  - 1)
         netmask_v6 = ipaddress.ip_address((2 ** 128) - 1)
         
+        suggestion_count = 3
+        
         free_ips = []
         
         server_addresses = iface.iface.interface.get("Address")
@@ -434,7 +436,11 @@ Please input the peer's name:"""
                               
                         new_ip = ipaddress.ip_interface(f"{ip}/{netmask}")
                         free_ips.append(new_ip)
-                        break
+                        
+                        suggestion_count -= 1
+                        
+                        if suggestion_count <= 0:
+                            break
                         
         return free_ips
     
