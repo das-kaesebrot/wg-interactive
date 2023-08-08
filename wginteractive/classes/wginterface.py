@@ -48,8 +48,10 @@ class WireGuardInterface:
                 self._invoke_wg_command_on_iface(self.CMD_WG_SETCONF, filename=tf.name)
                 
     def add_peer_to_interface(self, peer: WgInteractivePeer):
+        allowedips_str = ','.join(map(lambda iface: iface.compressed, peer.client_allowed_ips))
+        
         self.iface.add_peer(peer.public_key, f"# {peer.name}")
-        self.iface.add_attr(peer.public_key, ','.join(peer.server_allowed_ips))
+        self.iface.add_attr(peer.public_key, "AllowedIPs", allowedips_str)
         self._save()
     
         
