@@ -293,6 +293,34 @@ Please input the peer's name:"""
                 pass
             
             print("Invalid input, please try again\n")
+    @staticmethod
+    def _get_bool(text: str, default: bool = False) -> bool:
+        print(text)
+        
+        prompt = "[Y/n]"
+        
+        if not default:
+            prompt = "[y/N]"
+            
+        prompt += f" {CliHandler.PROMPT}"
+    
+        
+        while True:
+            selection = input(prompt)
+
+            try:
+                selection = selection.lower()
+                
+                if selection not in ["y", "n"]:
+                    raise ValueError("Input needs to be either y or n")
+                    
+                if selection == '':
+                    return default
+                
+                return selection == 'y'
+            
+            except ValueError:
+                pass
            
     @staticmethod 
     def _print_list_of_options(opts: list) -> None:
