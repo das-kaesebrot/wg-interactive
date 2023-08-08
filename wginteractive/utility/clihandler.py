@@ -7,6 +7,7 @@ from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
 from termcolor import colored
 
 from ..classes.config import Config
+from ..classes.wgpeer import WgInteractivePeer
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
 from ..utility.systemd import Systemd
 from ..utility.serverinfo import ServerInfo
@@ -208,7 +209,15 @@ Please input the peer's name:"""
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS, self._get_next_free_ips(iface))
         clientside_allowedips = self._get_ip_networks_interactively("TEST", self._get_peer_recommended_allowed_ips(iface))
         
+        client_ip = serverside_allowedips[0]
+        
         clientside_persistentkeepalive = self._get_bool(self.TEXT_CLIENT_PERSISTENT_KEEPALIVE, True)
+        
+        peer = WgInteractivePeer(serverside_allowedips, clientside_allowedips, client_ip, serverside_peername)
+        
+        server_pubkey = iface.get_publickey()
+        
+        iface.add_peer_to_interface(peer)
         
     
     @staticmethod
