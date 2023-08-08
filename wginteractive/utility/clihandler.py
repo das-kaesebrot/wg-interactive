@@ -196,6 +196,8 @@ AllowedIPs = {allowedips}
         clientside_endpoint_port = self._get_endpoint_port_interactively(self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get('ListenPort')))
         clientside_endpoint_host = self._get_endpoint_host_interactively(self.TEXT_CLIENT_ENDPOINT_HOST, ServerInfo._get_recommended_endpoint_hosts())
         
+        width = os.get_terminal_size().columns
+        
         # wrap host in square brackets if it's an IPv6 address
         try:            
             if ipaddress.ip_address(clientside_endpoint_host).version == 6:
@@ -226,8 +228,25 @@ AllowedIPs = {allowedips}
         server_pubkey = iface.get_publickey()
         
         iface.add_peer_to_interface(peer)
+                
+        disclaimer = "GENERATED PEER CONFIG, PRIVATE KEY WON'T BE SHOWN AGAIN"
+        padded_chars = ((width - len(disclaimer)) // 2) - 1
         
+        # clip below 0
+        padded_chars = max(padded_chars, 0)
+                
+        padded_chars_right = padded_chars
+        
+        if ((width - len(disclaimer)) % 2) == 1:
+            padded_chars_right += 1
+            
+        print(padded_chars, padded_chars_right)
+        
+        print("#" * width)
+        print("#" * padded_chars + f" {disclaimer} " + "#" * padded_chars_right)
+        print("#" * width, "")
         self._print_peer(peer, server_pubkey, clientside_endpoint, clientside_persistentkeepalive)
+        print("#" * width, "")
         
     
     @staticmethod
