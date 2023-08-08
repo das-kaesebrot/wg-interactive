@@ -432,7 +432,7 @@ Please input the peer's name:"""
                     ):
                         netmask = netmask_v4
                         if (ip.version == 6):
-                            netmask_v6
+                            netmask = netmask_v6
                               
                         new_ip = ipaddress.ip_interface(f"{ip}/{netmask}")
                         free_ips.append(new_ip)
