@@ -87,6 +87,11 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
     TEXT_SERVER_PEER_NAME = f"""{colored('Peer name', attrs=['bold'])}
 Please input the peer's name:"""
 
+    TEXT_CLIENT_PERSISTENT_KEEPALIVE = "Add 'PersistentKeepalive = 25' to client config?"
+
+    TEMPLATE_PEER_CONF = f"""[]
+"""
+
     _wghandler: WireGuardHandler
     _wginterfaces: dict[str, WireGuardInterface]
     
@@ -201,6 +206,9 @@ Please input the peer's name:"""
         print(f"Peer file will be written to: {peerfile_path}\n")
         
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS, self._get_next_free_ips(iface))
+        clientside_allowedips = self._get_ip_networks_interactively("TEST", self._get_peer_recommended_allowed_ips(iface))
+        
+        clientside_persistentkeepalive = self._get_bool(self.TEXT_CLIENT_PERSISTENT_KEEPALIVE, True)
         
     
     @staticmethod
