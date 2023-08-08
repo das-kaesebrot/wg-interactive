@@ -3,7 +3,7 @@ import os
 import readline
 import logging
 import ipaddress
-from ipaddress import IPv4Interface, IPv6Interface
+from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
 from termcolor import colored
 
 from ..classes.config import Config
@@ -293,6 +293,46 @@ Please input the peer's name:"""
                 pass
             
             print("Invalid input, please try again\n")
+            
+    @staticmethod
+    def _get_ip_networks_interactively(text: str, suggested_defaults: list[IPv4Network | IPv6Network]) -> list[(IPv4Network | IPv6Network)]:
+        print(text)
+
+        while True:
+            CliHandler._print_list_of_options(suggested_defaults)
+
+            selection = input(CliHandler.PROMPT)
+            
+            try:
+                selection = int(selection)
+                
+                retval = [suggested_defaults[selection]]
+                
+                print(f"Selected network(s): {retval}\n")
+                
+                return retval
+                
+            except ValueError as e:
+                pass
+            
+            
+            try:
+                selection_arr = selection.split(',')
+                
+                retval = []
+                
+                for entry in selection_arr:
+                    retval.append(ipaddress.ip_network(entry.strip()))
+                
+                print(f"Selected network(s): {retval}\n")
+                
+                return retval
+                
+            except ValueError as e:
+                pass
+            
+            print("Invalid input, please try again\n")
+            
     @staticmethod
     def _get_bool(text: str, default: bool = False) -> bool:
         print(text)
