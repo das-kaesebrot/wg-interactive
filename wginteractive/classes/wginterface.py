@@ -1,6 +1,7 @@
 from ipaddress import IPv4Interface
 import tempfile
 import wgconfig
+from wgconfig import wgexec
 import os
 from subprocess import CompletedProcess
 import logging
@@ -35,6 +36,9 @@ class WireGuardInterface:
     def is_enabled_on_systemd(self) -> bool | None:
         return Systemd.check_if_wg_interface_is_enabled(self.ifacename)
         
+    def get_publickey(self) -> str:
+        return wgexec.get_publickey(self.iface.interface.get('PrivateKey'))
+    
     def reload_if_interface_is_running(self):                
         if self.is_running():
             with tempfile.NamedTemporaryFile(mode="w+") as tf:
