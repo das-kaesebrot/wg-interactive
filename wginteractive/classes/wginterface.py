@@ -44,7 +44,14 @@ class WireGuardInterface:
                 self._invoke_wg_command_on_iface(self.CMD_WG_SETCONF, filename=tf.name)
                 
     def add_peer_to_interface(self, peer: WgInteractivePeer):
-        pass
+        self.iface.add_peer(peer.public_key, f"# {peer.name}")
+        self.iface.add_attr(peer.public_key, ','.join(peer.server_allowed_ips))
+        self._save()
+    
+        
+    def _save(self):
+        self.iface.write_file(self.iface_conf_path)
+        self.reload_if_interface_is_running()
 
     def _invoke_wg_command_on_iface(self, command: str, filename: str = None, silent: bool = False, capture_output: bool = False) -> CompletedProcess:
         return SubprocessHandler.invoke_command(f"wg {command} {self.ifacename}{' ' + filename if filename else ''}", silent, capture_output)
