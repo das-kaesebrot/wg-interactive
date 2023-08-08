@@ -90,7 +90,15 @@ Please input the peer's name:"""
 
     TEXT_CLIENT_PERSISTENT_KEEPALIVE = "Add 'PersistentKeepalive = 25' to client config?"
 
-    TEMPLATE_PEER_CONF = f"""[]
+    TEMPLATE_PEER_CONF = """[Interface]
+Address = {address}
+PrivateKey = {privatekey}
+
+[Peer]
+PublicKey = {publickey}
+Endpoint = {endpoint}
+AllowedIPs = {allowedips}
+{additional_options}
 """
 
     _wghandler: WireGuardHandler
@@ -219,6 +227,30 @@ Please input the peer's name:"""
         
         iface.add_peer_to_interface(peer)
         
+        self._print_peer(peer, server_pubkey, clientside_endpoint, clientside_persistentkeepalive)
+        
+    
+    @staticmethod
+    def _print_peer(peer: WgInteractivePeer, server_publickey: str, endpoint: str, persistentkeepalive: bool):
+        additional_options = ""
+        
+        if (persistentkeepalive):
+            additional_options="PersistentKeepalive = 25"
+            
+        allowedips_str = ','.join(map(lambda iface: iface.compressed, peer.client_allowed_ips))
+        
+        
+        text = CliHandler.TEMPLATE_PEER_CONF.format(
+            address = peer.primary_ip.compressed,
+            privatekey = peer.private_key,
+            publickey = server_publickey,
+            endpoint = endpoint,
+            allowedips = allowedips_str,
+            additional_options = additional_options
+        )
+        
+        print(text)
+    
     
     @staticmethod
     def _get_str_interactively(text: str) -> str:
