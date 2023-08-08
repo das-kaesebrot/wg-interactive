@@ -1,5 +1,5 @@
 
-from ipaddress import IPv4Interface, IPv6Interface
+from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
 from wgconfig import wgexec
 import ipaddress
 import logging
@@ -10,16 +10,24 @@ class WgInteractivePeer:
     
     name: str = "Unnamed Peer"
     server_allowed_ips: list[(IPv4Interface | IPv6Interface)] = []
-    client_allowed_ips: list[(IPv4Interface | IPv6Interface)] = []
+    client_allowed_ips: list[(IPv4Network | IPv6Network)] = []
     primary_ip: IPv4Interface | IPv6Interface = None
     private_key: str = None
     public_key: str = None
     
     _logger: logging.Logger
     
-    def __init__(self, name: str = None) -> None:
+    def __init__(self,
+                 server_allowed_ips: list[(IPv4Interface | IPv6Interface)],
+                 client_allowed_ips: list[(IPv4Network | IPv6Network)],
+                 primary_ip: IPv4Interface | IPv6Interface = None,
+                 name: str = None) -> None:
         if name:
             self.name = name
+            
+        self.server_allowed_ips = server_allowed_ips
+        self.client_allowed_ips = client_allowed_ips
+        self.primary_ip = primary_ip
             
         self._logger = logging.getLogger(__name__)
         
