@@ -370,3 +370,20 @@ Please input the peer's name:"""
                         
         return free_ips
     
+    
+    @staticmethod
+    def _get_peer_recommended_allowed_ips(iface: WireGuardInterface) -> list[IPv4Network| IPv6Network]:        
+        suggested_networks = []
+        
+        server_addresses = iface.iface.interface.get("Address")
+        
+        if isinstance(server_addresses, str):
+            server_addresses = [server_addresses]
+            
+        for server_address in server_addresses:
+            server_address = ipaddress.ip_interface(server_address)
+            
+            suggested_networks.append(server_address.network)
+            
+        
+        return suggested_networks
