@@ -3,4 +3,4 @@ decorator==5.1.1; python_version >= '3.5'
 netifaces==0.11.0
 termcolor==2.4.0
 validators==0.28.3
-wgconfig==0.2.3
+wgconfig==1.0.4
