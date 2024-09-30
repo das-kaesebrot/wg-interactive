@@ -26,7 +26,7 @@ dependencies=[
   "wgconfig>=0.2.2",
   "termcolor>=1.1.0",
   "netifaces==0.11.0",
-  "validators==0.28.3"
+  "validators==0.34.0"
 ]
 
 [project.urls]
