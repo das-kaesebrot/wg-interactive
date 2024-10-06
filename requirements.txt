@@ -1,6 +1,6 @@
 -i https://pypi.python.org/simple
 decorator==5.1.1; python_version >= '3.5'
 netifaces==0.11.0
-termcolor==2.4.0
+termcolor==2.5.0
 validators==0.34.0
 wgconfig==0.3.0
