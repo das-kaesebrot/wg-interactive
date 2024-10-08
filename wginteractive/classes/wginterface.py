@@ -83,3 +83,5 @@ class WireGuardInterface:
         iface.add_attr(key=None, attr="ListenPort", value=listen_port)
         iface.add_attr(key=None, attr="PrivateKey", value=privkey)
         iface.write_file(iface_conf_path)
+        
+        return WireGuardInterface(ifacename=ifacename, wireguard_basepath=wireguard_basepath)
