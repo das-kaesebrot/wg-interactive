@@ -334,7 +334,28 @@ AllowedIPs = {allowedips}
             except ValueError as e:
                 logging.getLogger(__name__).exception("Invalid input")
                 print("Please try again!\n")
+                
+    @staticmethod
+    def _get_ip_interface_interactively(text: str, illegal_interfaces: list[(IPv4Interface | IPv6Interface)]) -> (IPv4Interface | IPv6Interface):
+        print(text)
 
+        while True:
+            selection = input(CliHandler.PROMPT)            
+            
+            try:
+                iface = ipaddress.ip_interface(selection.strip())
+                
+                if iface in illegal_interfaces:
+                    raise ValueError("IP range already in use in a different WireGuard interface!")
+                
+                print(f"Selected interface: {iface}\n")
+                
+                return iface
+                
+            except ValueError as e:
+                print(e)
+            
+            print("Invalid input, please try again\n")
     
     @staticmethod
     def _get_ip_interfaces_interactively(text: str, suggested_defaults: list[IPv4Interface | IPv6Interface]) -> list[(IPv4Interface | IPv6Interface)]:
