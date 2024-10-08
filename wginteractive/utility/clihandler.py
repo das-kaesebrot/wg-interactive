@@ -164,6 +164,20 @@ AllowedIPs = {allowedips}
                 return selection
 
             print("Invalid input, please try again\n")
+            
+    def _get_interface_name_and_validate(self, text: str, illegal_names: list[str]) -> str:
+        while True:
+            iface_name = self._get_str_interactively(text)
+            
+            if iface_name in illegal_names:
+                print("Interface name already taken, please choose another name!\n")
+                continue
+                        
+            if not re.match(r"^[a-zA-Z0-9_=+.-]{1,15}$", iface_name):
+                print("Invalid input, please try again\n")
+                continue
+            
+            return iface_name
 
     def _get_action_for_interface_and_validate(self) -> str:
 
