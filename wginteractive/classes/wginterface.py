@@ -1,4 +1,4 @@
-from ipaddress import IPv4Interface
+from ipaddress import IPv4Interface, IPv6Interface, ip_interface
 import tempfile
 import wgconfig
 from wgconfig import wgexec
@@ -38,6 +38,17 @@ class WireGuardInterface:
         
     def get_publickey(self) -> str:
         return wgexec.get_publickey(self.iface.interface.get('PrivateKey'))
+    
+    def get_server_ip_interface(self) -> (IPv4Interface | IPv6Interface):
+        return ip_interface(self.iface.interface.get("Address"))
+    
+    def get_listen_port(self) -> (int | None):
+        listenport_str = self.iface.interface.get("ListenPort")
+    
+        if listenport_str:
+            return int(listenport_str)
+        
+        return None
     
     def reload_if_interface_is_running(self):                
         if self.is_running():
