@@ -73,3 +73,13 @@ class WireGuardInterface:
     def _invoke_wg_command_on_iface(self, command: str, filename: str = None, silent: bool = False, capture_output: bool = False) -> CompletedProcess:
         return SubprocessHandler.invoke_command(f"wg {command} {self.ifacename}{' ' + filename if filename else ''}", silent, capture_output)
     
+    @staticmethod
+    def create_new(*, wireguard_basepath: str, ifacename: str, address: (IPv4Interface | IPv6Interface), listen_port: int):
+        iface_conf_path = os.path.join(wireguard_basepath, ifacename + ".conf")
+        iface = wgconfig.WGConfig(iface_conf_path)
+        privkey = wgexec.generate_privatekey()
+        iface.initialize_file()
+        iface.add_attr(key=None, attr="Address", value=address)
+        iface.add_attr(key=None, attr="ListenPort", value=listen_port)
+        iface.add_attr(key=None, attr="PrivateKey", value=privkey)
+        iface.write_file(iface_conf_path)
