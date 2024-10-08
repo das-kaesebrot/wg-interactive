@@ -101,7 +101,7 @@ AllowedIPs = {allowedips}
         self._logger = logging.getLogger(__name__)
         self.config = Config()
         self._wghandler = WireGuardHandler(self.config)
-        self._wginterfaces = self._wghandler.get_interfaces()
+        self._refresh_interfaces()
         
         counter = 0
         for iface in self._wginterfaces.keys():
@@ -112,7 +112,9 @@ AllowedIPs = {allowedips}
 
         if not self.USE_SYSTEMD:
             self.ACTIONS_MENU.pop(CliHandlerAction.FLIP_SYSTEMD)
-        
+    
+    def _refresh_interfaces(self):
+        self._wginterfaces = self._wghandler.get_interfaces()
 
     def handle(self) -> None:
 
