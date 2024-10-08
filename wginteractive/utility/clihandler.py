@@ -1,6 +1,7 @@
 import ipaddress
 import os
 import readline
+import re
 import logging
 import ipaddress
 from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
@@ -121,6 +122,9 @@ AllowedIPs = {allowedips}
         iface_or_init = self._get_initial_interface_or_action_and_validate()
 
         if (iface_or_init.strip().lower() == CliHandlerAction.INIT_NEW_IFACE):
+            if (self._create_new_interface()):
+                print("Successfully created new interface!")
+            return
         
         iface_or_init = int(iface_or_init)
         
@@ -150,6 +154,26 @@ AllowedIPs = {allowedips}
             # Systemd.flip_enabled_status(selectedWGName)
             pass
     
+    def _create_new_interface(self) -> WireGuardInterface:
+        os.makedirs(name=self.config.wireguard_conf_dir, mode=0o600, exist_ok=True)
+        
+        illegal_names = list(self._wginterfaces.keys())
+        illegal_interfaces = list(map(lambda iface: iface.get_server_ip_interface(), self._wginterfaces.values()))
+        illegal_ports = list(map(lambda iface: iface.get_listen_port(), self._wginterfaces.values()))
+        illegal_ports = [port for port in illegal_ports if port is not None] # filter out none values
+        
+        iface_name = self._get_interface_name_and_validate(f"Please enter an intercae name for the new interface:\nIllegal names: {illegal_names}", illegal_names=illegal_names)        
+        print(f"Selected interface name: '{iface_name}'\n")
+        
+        iface_ip_interface = self._get_ip_interface_interactively(f"Please enter an IP address and subnet for the new interface:\nIllegal interfaces: {illegal_interfaces}", illegal_interfaces=illegal_interfaces)
+        print(f"Selected ip address: '{iface_ip_interface}'\n")
+        
+        iface_port = self._get_interface_listen_port_interactively(f"Please enter a listen port for the new interface:\nIllegal ports: {illegal_ports}", illegal_ports=illegal_ports)
+        print(f"Selected listen port: {iface_port}\n")
+        
+        print(f"Creating new WireGuard interface at '{os.path.join(self.config.wireguard_conf_dir, iface_name + ".conf")}'")
+        
+        return WireGuardInterface.create_new(wireguard_basepath=self.config.wireguard_conf_dir, ifacename=iface_name, address=iface_ip_interface, listen_port=iface_port)
         
     def _get_initial_interface_or_action_and_validate(self) -> str:
 
