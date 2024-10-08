@@ -267,6 +267,29 @@ AllowedIPs = {allowedips}
         selection = input(CliHandler.PROMPT)
         return selection.strip()
     
+    
+    @staticmethod
+    def _get_interface_listen_port_interactively(text: str, illegal_ports: list[int]) -> int:
+        print(text)
+
+        while True:
+            selection = input(CliHandler.PROMPT)
+            
+            try:
+                selection = int(selection)
+                
+                if selection < 0 or selection > 65535:
+                    raise ValueError("Port value out of range! Must be between 0 and 65535")
+                
+                if selection in illegal_ports:
+                    raise ValueError("Port already in use by a different interface!")
+                
+                return selection
+                
+            except ValueError as e:
+                logging.getLogger(__name__).exception("Invalid input")
+                print("Please try again!\n")
+    
     @staticmethod
     def _get_endpoint_port_interactively(text: str, suggested_default: int) -> int:
         print(text)
