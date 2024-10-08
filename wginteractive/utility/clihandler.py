@@ -11,51 +11,42 @@ from ..classes.wgpeer import WgInteractivePeer
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
 from ..utility.systemd import Systemd
 from ..utility.serverinfo import ServerInfo
+from ..enums.clihandler_action import CliHandlerAction
 
 class CliHandler:
     USE_SYSTEMD: bool = False
 
     PROMPT = "> "
-
-    ACTION_INIT_NEW_IFACE = 'i' # unused
-
+    
     ACTIONS_MENU_ROOT = {
-            ACTION_INIT_NEW_IFACE:
+            CliHandlerAction.INIT_NEW_IFACE:
             {
                 'desc': 'Initialize a new interface'
             }
         }
 
-    ACTION_ADD = 'a'
-    ACTION_LIST = 'l'
-    ACTION_RENAME = 'r'
-    ACTION_NEWKEY_CLIENT = 'k'
-    ACTION_NEWKEY_SERVER = 'ks' # unused
-    ACTION_DELETE = 'd'
-    ACTION_FLIP_SYSTEMD = 's'
-
     ACTIONS_MENU = {
-            ACTION_ADD:
+            CliHandlerAction.ADD:
             {
                 'desc': 'Add peer'
             },
-            ACTION_LIST:
+            CliHandlerAction.LIST:
             {
                 'desc': 'List all peers and return to this menu'
             },
-            ACTION_RENAME:
+            CliHandlerAction.RENAME:
             {
                 'desc': 'Rename peer'
             },
-            ACTION_NEWKEY_CLIENT:
+            CliHandlerAction.NEWKEY_CLIENT:
             {
                 'desc': 'Generate new keypair for peer'
             },
-            ACTION_DELETE:
+            CliHandlerAction.DELETE:
             {
                 'desc': 'Delete peer',
             },
-            ACTION_FLIP_SYSTEMD:
+            CliHandlerAction.FLIP_SYSTEMD:
             {
                 'desc': 'Flip enabled state for wg-quick systemd service',
             }
@@ -120,15 +111,14 @@ AllowedIPs = {allowedips}
         self.USE_SYSTEMD = Systemd.check_if_host_is_using_systemd()
 
         if not self.USE_SYSTEMD:
-            self.ACTIONS_MENU.pop(CliHandler.ACTION_FLIP_SYSTEMD)
+            self.ACTIONS_MENU.pop(CliHandlerAction.FLIP_SYSTEMD)
         
 
     def handle(self) -> None:
 
         iface_or_init = self._get_initial_interface_or_action_and_validate()
 
-        if (iface_or_init == self.ACTION_INIT_NEW_IFACE):
-            raise NotImplementedError("Not supported yet")
+        if (iface_or_init.strip().lower() == CliHandlerAction.INIT_NEW_IFACE):
         
         iface_or_init = int(iface_or_init)
         
@@ -139,22 +129,22 @@ AllowedIPs = {allowedips}
         
         interface_action = self._get_action_for_interface_and_validate()
         
-        if interface_action == self.ACTION_ADD:
+        if interface_action == CliHandlerAction.ADD:
             self._get_new_peer_interactively(wginterface)
             
-        elif interface_action == self.ACTION_RENAME:
+        elif interface_action == CliHandlerAction.RENAME:
             # renamePeerInInterface(wc, selectedWGName, absWGPath)
             pass
             
-        elif interface_action == self.ACTION_NEWKEY_CLIENT:
+        elif interface_action == CliHandlerAction.NEWKEY_CLIENT:
             # regeneratePeerPublicKey(wc, selectedWGName, absWGPath)
             pass
         
-        elif interface_action == self.ACTION_DELETE:
+        elif interface_action == CliHandlerAction.DELETE:
             # deletePeerFromInterface(wc, selectedWGName, absWGPath)
             pass
         
-        elif interface_action == self.ACTION_FLIP_SYSTEMD:
+        elif interface_action == CliHandlerAction.FLIP_SYSTEMD:
             # Systemd.flip_enabled_status(selectedWGName)
             pass
     
