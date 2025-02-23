@@ -93,6 +93,12 @@ AllowedIPs = {allowedips}
 {additional_options}
 """
 
+    TEMPLATE_PRETTY_PRINT_PEER = """
+[{index}] PublicKey: {peer_key}
+    AllowedIPs: {allowed_ips}
+    Name: {name}
+"""
+
     _wghandler: WireGuardHandler
     _wginterfaces: dict[str, WireGuardInterface]
     
