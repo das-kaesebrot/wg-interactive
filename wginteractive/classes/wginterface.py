@@ -105,6 +105,9 @@ class WireGuardInterface:
         self.iface.add_peer(key=peer_key, leading_comment=f"# {name}")
         
         for attr, value in peer.items():
+            if attr == "PublicKey":
+                continue
+            
             self.iface.add_attr(key=peer_key, attr=attr, value=value)
         
         self._save()
