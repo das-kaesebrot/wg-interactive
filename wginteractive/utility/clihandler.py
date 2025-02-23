@@ -80,6 +80,8 @@ Please select a range of AllowedIPs or give your own (comma-separated for multip
     TEXT_SERVER_PEER_NAME = f"""{colored('Peer name', attrs=['bold'])}
 Please input the peer's name:"""
 
+    TEXT_RENAME_NEW_NAME = "Please give a new name for the peer:"
+
     TEXT_CLIENT_PERSISTENT_KEEPALIVE = "Add 'PersistentKeepalive = 25' to client config?"
 
     TEMPLATE_PEER_CONF = """[Interface]
@@ -148,8 +150,7 @@ AllowedIPs = {allowedips}
             self._pretty_print_peers(wginterface)
             
         elif interface_action == CliHandlerAction.RENAME:
-            # renamePeerInInterface(wc, selectedWGName, absWGPath)
-            pass
+            self._rename_peer_interactively(wginterface)
             
         elif interface_action == CliHandlerAction.NEWKEY_CLIENT:
             # regeneratePeerPublicKey(wc, selectedWGName, absWGPath)
@@ -240,6 +241,13 @@ AllowedIPs = {allowedips}
             self._pretty_print_peer_with_index(index, peer_key, peer)
             index += 1
                 
+    
+    def _rename_peer_interactively(self, iface: WireGuardInterface):
+        peer_key = self._get_existing_peer_interactively(iface)
+        name = self._get_str_interactively(self.TEXT_RENAME_NEW_NAME)
+        
+        iface.rename_peer(peer_key, name)
+    
         
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
         clientside_endpoint_port = self._get_endpoint_port_interactively(self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get('ListenPort')))
@@ -296,6 +304,11 @@ AllowedIPs = {allowedips}
         print("#" * width, "")
         self._print_peer(peer, server_pubkey, clientside_endpoint, clientside_persistentkeepalive)
         print("#" * width, "")
+        
+        
+    def _get_existing_peer_interactively(self, iface: WireGuardInterface) -> str:
+        self._pretty_print_peers(iface)
+        return self._get_list_entry_interactively([*iface.get_peers_with_name().items()])[0]
     
     
     @staticmethod
@@ -528,7 +541,25 @@ AllowedIPs = {allowedips}
             
             except ValueError:
                 pass
-           
+    
+    @staticmethod
+    def _get_list_entry_interactively(options: list):
+
+        while True:
+            selection = input(CliHandler.PROMPT)
+            
+            try:
+                selection = int(selection)
+                
+                retval = options[selection]
+                
+                return retval
+                
+            except ValueError as e:
+                logging.getLogger(__name__).exception("Invalid input")
+                print("Please try again!\n")
+        
+    
     @staticmethod 
     def _print_list_of_options(opts: list) -> None:
         for index, value in enumerate(opts):
