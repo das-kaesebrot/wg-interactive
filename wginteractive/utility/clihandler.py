@@ -144,6 +144,9 @@ AllowedIPs = {allowedips}
         if interface_action == CliHandlerAction.ADD:
             self._get_new_peer_interactively(wginterface)
             
+        elif interface_action == CliHandlerAction.LIST:
+            self._pretty_print_peers(wginterface)
+            
         elif interface_action == CliHandlerAction.RENAME:
             # renamePeerInInterface(wc, selectedWGName, absWGPath)
             pass
@@ -226,7 +229,17 @@ AllowedIPs = {allowedips}
                 return selection
             
             print("Invalid input, please try again\n")
+            
+            
+    def _pretty_print_peers(self, iface: WireGuardInterface):        
+        print(f"Peers in WireGuard interface {colored(iface.ifacename, attrs=['bold'])}:")
         
+        peers = iface.get_peers_with_name()
+        index = 0
+        for peer_key, peer in peers.items():
+            self._pretty_print_peer_with_index(index, peer_key, peer)
+            index += 1
+                
         
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
         clientside_endpoint_port = self._get_endpoint_port_interactively(self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get('ListenPort')))
@@ -283,7 +296,13 @@ AllowedIPs = {allowedips}
         print("#" * width, "")
         self._print_peer(peer, server_pubkey, clientside_endpoint, clientside_persistentkeepalive)
         print("#" * width, "")
+    
+    
+    @staticmethod
+    def _pretty_print_peer_with_index(index: int, peer_key: str, peer_dict: dict):
+        text = CliHandler.TEMPLATE_PRETTY_PRINT_PEER.format(index = index, peer_key = peer_key, allowed_ips = peer_dict.get('AllowedIPs'), name = peer_dict.get('name'))
         
+        print(text)    
     
     @staticmethod
     def _print_peer(peer: WgInteractivePeer, server_publickey: str, endpoint: str, persistentkeepalive: bool):
