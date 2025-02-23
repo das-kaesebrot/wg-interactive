@@ -180,7 +180,7 @@ AllowedIPs = {allowedips}
         iface_port = self._get_interface_listen_port_interactively(f"Please enter a listen port for the new interface:\nIllegal ports: {illegal_ports}", illegal_ports=illegal_ports)
         print(f"Selected listen port: {iface_port}\n")
         
-        print(f"Creating new WireGuard interface at '{os.path.join(self.config.wireguard_conf_dir, iface_name + ".conf")}'")
+        print(f"Creating new WireGuard interface at '{os.path.join(self.config.wireguard_conf_dir, iface_name + '.conf')}'")
         
         return WireGuardInterface.create_new(wireguard_basepath=self.config.wireguard_conf_dir, ifacename=iface_name, address=iface_ip_interface, listen_port=iface_port)
         
