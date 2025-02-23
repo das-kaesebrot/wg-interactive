@@ -97,6 +97,19 @@ class WireGuardInterface:
         peer["name"] = name
         
         return peer
+    
+    def rename_peer(self, peer_key: str, name: str):
+        peer = self.iface.get_peer(peer_key, include_details=False)
+        
+        self.iface.del_peer(peer_key)
+        self.iface.add_peer(key=peer_key, leading_comment=f"# {name}")
+        
+        for attr, value in peer.items():
+            self.iface.add_attr(key=peer_key, attr=attr, value=value)
+        
+        self._save()
+        
+
     def _save(self):
         self.iface.write_file(self.iface_conf_path)
         self.reload_if_interface_is_running()
