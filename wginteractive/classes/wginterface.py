@@ -76,7 +76,27 @@ class WireGuardInterface:
         self.iface.add_peer(peer.public_key, f"# {peer.name}")
         self.iface.add_attr(peer.public_key, "AllowedIPs", allowedips_str)
         self._save()
-
+        
+    def get_peers_with_name(self):
+        peers = {}
+        
+        for peer_key in self.iface.peers.keys():
+            peers[peer_key] = self.get_peer_with_name(peer_key)
+            
+        return peers
+    
+    def get_peer_with_name(self, peer_key: str) -> dict:
+        peer = self.iface.get_peer(peer_key, include_details=True)
+        
+        name = None
+            
+        for entry in peer.get('_rawdata'):
+            if entry.startswith('#') and len(entry) > 2:
+                name = entry[2:]
+            
+        peer["name"] = name
+        
+        return peer
     def _save(self):
         self.iface.write_file(self.iface_conf_path)
         self.reload_if_interface_is_running()
