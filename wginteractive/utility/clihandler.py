@@ -275,7 +275,7 @@ PresharedKey = {presharedkey}
         print(f"Peer file will be written to: {peerfile_path}\n")
         
         serverside_allowedips = self._get_ip_interfaces_interactively(self.TEXT_SERVER_ALLOWEDIPS, self._get_next_free_ips(iface))
-        clientside_allowedips = self._get_ip_networks_interactively("TEST", self._get_peer_recommended_allowed_ips(iface))
+        clientside_allowedips = self._get_ip_networks_interactively(self.TEXT_CLIENT_ALLOWEDIPS, self._get_peer_recommended_allowed_ips(iface))
         
         client_ip = serverside_allowedips[0]
         
