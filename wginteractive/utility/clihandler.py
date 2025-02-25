@@ -92,6 +92,7 @@ PrivateKey = {privatekey}
 PublicKey = {publickey}
 Endpoint = {endpoint}
 AllowedIPs = {allowedips}
+PresharedKey = {presharedkey}
 {additional_options}
 """
 
@@ -331,6 +332,7 @@ AllowedIPs = {allowedips}
             address = peer.primary_ip.compressed,
             privatekey = peer.private_key,
             publickey = server_publickey,
+            presharedkey = peer.preshared_key,
             endpoint = endpoint,
             allowedips = allowedips_str,
             additional_options = additional_options

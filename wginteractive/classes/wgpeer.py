@@ -14,6 +14,7 @@ class WgInteractivePeer:
     primary_ip: IPv4Interface | IPv6Interface = None
     private_key: str = None
     public_key: str = None
+    preshared_key: str = None
     
     _logger: logging.Logger
     
@@ -32,6 +33,7 @@ class WgInteractivePeer:
         self._logger = logging.getLogger(__name__)
         
         self.private_key, self.public_key = wgexec.generate_keypair()
+        self.preshared_key = wgexec.generate_presharedkey()
         
     
     def set_allowed_ips_from_string(self, list_of_interfaces: str):

@@ -75,6 +75,7 @@ class WireGuardInterface:
 
         self.iface.add_peer(peer.public_key, f"# {peer.name}")
         self.iface.add_attr(peer.public_key, "AllowedIPs", allowedips_str)
+        self.iface.add_attr(peer.public_key, "PresharedKey", peer.preshared_key)
         self._save()
         
     def get_peers_with_name(self):
