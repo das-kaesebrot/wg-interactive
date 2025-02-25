@@ -6,6 +6,7 @@ import logging
 import ipaddress
 from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
 from termcolor import colored
+import validators
 
 from ..classes.config import Config
 from ..classes.wgpeer import WgInteractivePeer
@@ -405,6 +406,16 @@ PresharedKey = {presharedkey}
             selection = input(CliHandler.PROMPT)
             
             try:
+                try:
+                    if not validators.domain(selection):
+                        retval = str(ipaddress.ip_address(selection))
+                    else:
+                        retval = str(selection)
+                    
+                    return retval
+                except:
+                    pass
+                
                 selection = int(selection)
                 
                 retval = suggested_defaults[selection]
