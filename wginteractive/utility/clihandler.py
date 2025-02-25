@@ -531,11 +531,11 @@ AllowedIPs = {allowedips}
             try:
                 selection = selection.lower()
                 
-                if selection not in ["y", "n"]:
-                    raise ValueError("Input needs to be either y or n")
-                    
                 if selection == '':
                     return default
+                
+                if selection not in ["y", "n"]:
+                    raise ValueError("Input needs to be either y or n")
                 
                 return selection == 'y'
             
