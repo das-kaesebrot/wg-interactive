@@ -161,6 +161,7 @@ PresharedKey = {presharedkey}
         elif interface_action == CliHandlerAction.DELETE:
             self._delete_peer_interactively(wginterface)
         
+        # unreachable if systemd is disabled
         elif interface_action == CliHandlerAction.FLIP_SYSTEMD:
             print(f"Flipping enabled status for '{wginterface.ifacename}'")
             wginterface.flip_systemd_status()
