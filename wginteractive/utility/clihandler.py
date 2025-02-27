@@ -591,9 +591,9 @@ PresharedKey = {presharedkey}
         
         if (self.USE_SYSTEMD):
             if iface.is_enabled_on_systemd():
-                print(f"Service {colored(f'wg-quick@{iface.ifacename}', attrs=['bold'])} is {colored('enabled', color='green')}")
+                print(f"Service {colored(f'{Systemd.WG_QUICK_SERVICE}@{iface.ifacename}', attrs=['bold'])} is {colored('enabled', color='green')}")
             else:
-                print(f"Service {colored(f'wg-quick@{iface.ifacename}', attrs=['bold'])} is {colored('not enabled', color='red')}")
+                print(f"Service {colored(f'{Systemd.WG_QUICK_SERVICE}@{iface.ifacename}', attrs=['bold'])} is {colored('not enabled', color='red')}")
         else:
             print(f"Seems like host doesn't use systemd, skipping check for service")
         
