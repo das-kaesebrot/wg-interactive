@@ -68,7 +68,7 @@ Please input the peer's name:"""
     _wginterfaces: dict[str, WireGuardInterface]
 
     _logger: logging.Logger
-    
+
     _wireguard_config_dir: str
 
     def __init__(self, wireguard_config_dir: str) -> None:
@@ -84,9 +84,9 @@ Please input the peer's name:"""
 
     def _refresh_interfaces(self):
         self._wginterfaces = self._wghandler.refresh_interfaces()
-        
+
         init = self.ACTIONS_MENU_ROOT.pop(CliHandlerAction.INIT_NEW_IFACE)
-        
+
         self.ACTIONS_MENU_ROOT = {}
         self.ACTIONS_MENU_ROOT[CliHandlerAction.INIT_NEW_IFACE] = init
 
@@ -96,7 +96,7 @@ Please input the peer's name:"""
             counter += 1
 
     def handle(self) -> None:
-                
+
         while True:
             self._refresh_interfaces()
             iface_or_init = self._get_initial_interface_or_action_and_validate()
@@ -112,9 +112,9 @@ Please input the peer's name:"""
             wginterface = self._wginterfaces.get(wginterface_key)
 
             InputOutputHandler._print_interface_status(wginterface, self.USE_SYSTEMD)
-            
+
             done = False
-                    
+
             while not done:
                 done = True
                 interface_action = self._get_action_for_interface_and_validate()
@@ -142,11 +142,11 @@ Please input the peer's name:"""
                 elif interface_action == CliHandlerAction.FLIP_SYSTEMD:
                     print(f"Flipping enabled status for '{wginterface.ifacename}'")
                     wginterface.flip_systemd_status()
-                
+
                 elif interface_action == CliHandlerAction.DELETE_IFACE:
                     self._delete_interface_interactively(wginterface)
                     done = True
-                                    
+
                 elif interface_action == CliHandlerAction.GO_UP:
                     done = True
 
@@ -241,9 +241,7 @@ Please input the peer's name:"""
             selection = input(InputOutputHandler.PROMPT)
 
             if selection in self.ACTIONS_MENU.keys():
-                print(
-                    f"Selected operation: {self.ACTIONS_MENU.get(selection)}\n"
-                )
+                print(f"Selected operation: {self.ACTIONS_MENU.get(selection)}\n")
                 return selection
 
             print("Invalid input, please try again\n")
@@ -266,12 +264,14 @@ Please input the peer's name:"""
         iface.rename_peer(peer_key, name)
 
     def _delete_interface_interactively(self, iface: WireGuardInterface):
-        if not InputOutputHandler._get_bool("Really delete? This action is permanent!", default=False):
+        if not InputOutputHandler._get_bool(
+            "Really delete? This action is permanent!", default=False
+        ):
             return
-        
+
         if self.USE_SYSTEMD:
             iface.disable_systemd_status()
-        
+
         os.remove(iface.iface_conf_path)
 
     def _delete_peer_interactively(self, iface: WireGuardInterface):
@@ -291,7 +291,9 @@ Please input the peer's name:"""
         peer_key = self._get_existing_peer_interactively(iface)
         presharedkey = iface.regenerate_presharedkey(peer_key)
 
-        InputOutputHandler._print_with_disclaimer(disclaimer="NEW PRESHARED KEY", text=presharedkey)
+        InputOutputHandler._print_with_disclaimer(
+            disclaimer="NEW PRESHARED KEY", text=presharedkey
+        )
 
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
         clientside_endpoint_port = InputOutputHandler._get_endpoint_port_interactively(
@@ -315,13 +317,16 @@ Please input the peer's name:"""
 
         print(f"Selected endpoint: {colored(clientside_endpoint, attrs=['bold'])}\n")
 
-        serverside_peername = InputOutputHandler._get_str_interactively(self.TEXT_SERVER_PEER_NAME)
+        serverside_peername = InputOutputHandler._get_str_interactively(
+            self.TEXT_SERVER_PEER_NAME
+        )
 
         serverside_allowedips = InputOutputHandler._get_ip_interfaces_interactively(
             self.TEXT_SERVER_ALLOWEDIPS, InputOutputHandler._get_next_free_ips(iface)
         )
         clientside_allowedips = InputOutputHandler._get_ip_networks_interactively(
-            self.TEXT_CLIENT_ALLOWEDIPS, InputOutputHandler._get_peer_recommended_allowed_ips(iface)
+            self.TEXT_CLIENT_ALLOWEDIPS,
+            InputOutputHandler._get_peer_recommended_allowed_ips(iface),
         )
 
         client_ip = serverside_allowedips[0]
