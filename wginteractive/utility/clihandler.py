@@ -98,8 +98,7 @@ PublicKey = {publickey}
 Endpoint = {endpoint}
 AllowedIPs = {allowedips}
 PresharedKey = {presharedkey}
-{additional_options}
-"""
+{additional_options}"""
 
     TEMPLATE_PRETTY_PRINT_PEER = """
 [{index:02d}] PublicKey: {peer_key}
