@@ -126,24 +126,39 @@ class WireGuardInterface:
             self.iface.add_attr(key=peer_key, attr=attr, value=value)
         
         self._save()
+        
+    def regenerate_peer_keypair(self, peer_key: str) -> str:
+        privatekey, publickey = wgexec.generate_keypair()
+        self._replace_peer_publickey(old_peer_key=peer_key, new_peer_key=publickey)
+        
+        return privatekey
+        
+    
+    def regenerate_presharedey(self, peer_key: str) -> str:
+        presharedkey = wgexec.generate_presharedkey()
+        
+        self._replace_peer_presharedkey(peer_key=peer_key, new_presharedkey=presharedkey)
+        return presharedkey
     
     
-    def replace_peer_publickey(self, old_peer_key: str, new_peer_key: str):
-        peer = self.get_peer_with_name(old_peer_key)
+    def _replace_peer_publickey(self, old_peer_key: str, new_peer_key: str):
+        peer = self.get_peer_with_name(old_peer_key, include_details=True)
         
         self.iface.del_peer(old_peer_key)
-        self.iface.add_peer(key=new_peer_key, leading_comment=f"# {peer.get("name")}")
+        self.iface.add_peer(key=new_peer_key, leading_comment=f"# {peer.get('name')}")
         
         for attr, value in peer.items():
             if attr == self.ATTR_PUBLICKEY:
                 continue
+            
+            if attr.startswith("_"): continue
             
             self.iface.add_attr(key=new_peer_key, attr=attr, value=value)
         
         self._save()
     
     
-    def replace_peer_presharedkey(self, peer_key: str, new_presharedkey: str):
+    def _replace_peer_presharedkey(self, peer_key: str, new_presharedkey: str):
         self.iface.del_attr(peer_key, self.ATTR_PRESHAREDKEY)
         self.iface.add_attr(peer_key, self.ATTR_PRESHAREDKEY, new_presharedkey)
         
