@@ -3,7 +3,7 @@ name: Generate release
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
 
 permissions:
   id-token: write
@@ -13,11 +13,11 @@ permissions:
 
 jobs:      
   release:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     steps:
       - name: "Create release"
         uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
-          draft: true
+          
