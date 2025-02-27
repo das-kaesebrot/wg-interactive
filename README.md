@@ -4,7 +4,7 @@
 
 ## Installation
 
-Install the module from PyPI:
+Install the module from [PyPI](https://pypi.org/project/wg-interactive/):
 ```bash
 pip install wg-interactive
 ```
