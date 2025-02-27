@@ -36,14 +36,16 @@ class Systemd:
         Systemd.invoke_systemd_command_on_unit(Systemd.CMD_STOP, unit)
     
     @staticmethod
-    def flip_enabled_status(unit: str) -> None:
+    def flip_enabled_status(unit: str, now: bool = False) -> None:
         if not unit.endswith(".service"):
             unit = f"{unit}.service"
         
         if os.path.isfile(os.path.join(Systemd.MULTI_USER_TARGET_WANTS_FOLDER, unit)):
             Systemd.invoke_systemd_command_on_unit(Systemd.CMD_DISABLE, unit)
+            if now: Systemd.stop_unit(unit)
         else:
             Systemd.invoke_systemd_command_on_unit(Systemd.CMD_ENABLE, unit)
+            if now: Systemd.start_unit(unit)
     
     @staticmethod
     def check_if_unit_is_enabled(unit) -> bool:
