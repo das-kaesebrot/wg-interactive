@@ -303,8 +303,6 @@ Please input the peer's name:"""
             self.TEXT_CLIENT_ENDPOINT_HOST, ServerInfo._get_recommended_endpoint_hosts()
         )
 
-        width = os.get_terminal_size().columns
-
         # wrap host in square brackets if it's an IPv6 address
         try:
             if ipaddress.ip_address(clientside_endpoint_host).version == 6:
