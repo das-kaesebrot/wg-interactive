@@ -1,0 +1,25 @@
+name: Generate release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+
+permissions:
+  id-token: write
+  contents: write
+  packages: write
+  pull-requests: read
+
+jobs:      
+  release:  
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest    
+    steps:
+      - name: "Create release"
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
