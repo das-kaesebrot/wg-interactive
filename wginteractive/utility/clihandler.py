@@ -111,7 +111,7 @@ Please input the peer's name:"""
             wginterface_key = list(self._wginterfaces)[int(iface_or_init)]
             wginterface = self._wginterfaces.get(wginterface_key)
 
-            InputOutputHandler._print_interface_status(wginterface, self.USE_SYSTEMD)
+            InputOutputHandler.print_interface_status(wginterface, self.USE_SYSTEMD)
 
             done = False
 
@@ -173,13 +173,13 @@ Please input the peer's name:"""
         )
         print(f"Selected interface name: '{iface_name}'\n")
 
-        iface_ip_interface = InputOutputHandler._get_ip_interface_interactively(
+        iface_ip_interface = InputOutputHandler.get_ip_interface_interactively(
             f"Please enter an IP address and subnet for the new interface:\nIllegal interfaces: {illegal_interfaces}",
             illegal_interfaces=illegal_interfaces,
         )
         print(f"Selected ip address: '{iface_ip_interface}'\n")
 
-        iface_port = InputOutputHandler._get_interface_listen_port_interactively(
+        iface_port = InputOutputHandler.get_interface_listen_port_interactively(
             f"Please enter a listen port for the new interface:\nIllegal ports: {illegal_ports}",
             illegal_ports=illegal_ports,
         )
@@ -218,7 +218,7 @@ Please input the peer's name:"""
         self, text: str, illegal_names: list[str]
     ) -> str:
         while True:
-            iface_name = InputOutputHandler._get_str_interactively(text)
+            iface_name = InputOutputHandler.get_str_interactively(text)
 
             if iface_name in illegal_names:
                 print("Interface name already taken, please choose another name!\n")
@@ -254,17 +254,17 @@ Please input the peer's name:"""
         peers = iface.get_peers_with_name()
         index = 0
         for peer_key, peer in peers.items():
-            InputOutputHandler._pretty_print_peer_with_index(index, peer_key, peer)
+            InputOutputHandler.pretty_print_peer_with_index(index, peer_key, peer)
             index += 1
 
     def _rename_peer_interactively(self, iface: WireGuardInterface):
         peer_key = self._get_existing_peer_interactively(iface)
-        name = InputOutputHandler._get_str_interactively(self.TEXT_RENAME_NEW_NAME)
+        name = InputOutputHandler.get_str_interactively(self.TEXT_RENAME_NEW_NAME)
 
         iface.rename_peer(peer_key, name)
 
     def _delete_interface_interactively(self, iface: WireGuardInterface):
-        if not InputOutputHandler._get_bool(
+        if not InputOutputHandler.get_bool(
             "Really delete? This action is permanent!", default=False
         ):
             return
@@ -282,7 +282,7 @@ Please input the peer's name:"""
         peer_key = self._get_existing_peer_interactively(iface)
         peer_privatekey = iface.regenerate_peer_keypair(peer_key)
 
-        InputOutputHandler._print_with_disclaimer(
+        InputOutputHandler.print_with_disclaimer(
             disclaimer="NEW PRIVATE KEY, VALUE WON'T BE SHOWN AGAIN",
             text=peer_privatekey,
         )
@@ -291,15 +291,15 @@ Please input the peer's name:"""
         peer_key = self._get_existing_peer_interactively(iface)
         presharedkey = iface.regenerate_presharedkey(peer_key)
 
-        InputOutputHandler._print_with_disclaimer(
+        InputOutputHandler.print_with_disclaimer(
             disclaimer="NEW PRESHARED KEY", text=presharedkey
         )
 
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
-        clientside_endpoint_port = InputOutputHandler._get_endpoint_port_interactively(
+        clientside_endpoint_port = InputOutputHandler.get_endpoint_port_interactively(
             self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get("ListenPort"))
         )
-        clientside_endpoint_host = InputOutputHandler._get_endpoint_host_interactively(
+        clientside_endpoint_host = InputOutputHandler.get_endpoint_host_interactively(
             self.TEXT_CLIENT_ENDPOINT_HOST, ServerInfo._get_recommended_endpoint_hosts()
         )
 
@@ -315,21 +315,21 @@ Please input the peer's name:"""
 
         print(f"Selected endpoint: {colored(clientside_endpoint, attrs=['bold'])}\n")
 
-        serverside_peername = InputOutputHandler._get_str_interactively(
+        serverside_peername = InputOutputHandler.get_str_interactively(
             self.TEXT_SERVER_PEER_NAME
         )
 
-        serverside_allowedips = InputOutputHandler._get_ip_interfaces_interactively(
-            self.TEXT_SERVER_ALLOWEDIPS, InputOutputHandler._get_next_free_ips(iface)
+        serverside_allowedips = InputOutputHandler.get_ip_interfaces_interactively(
+            self.TEXT_SERVER_ALLOWEDIPS, InputOutputHandler.get_next_free_ips(iface)
         )
-        clientside_allowedips = InputOutputHandler._get_ip_networks_interactively(
+        clientside_allowedips = InputOutputHandler.get_ip_networks_interactively(
             self.TEXT_CLIENT_ALLOWEDIPS,
-            InputOutputHandler._get_peer_recommended_allowed_ips(iface),
+            InputOutputHandler.get_peer_recommended_allowed_ips(iface),
         )
 
         client_ip = serverside_allowedips[0]
 
-        clientside_persistentkeepalive = InputOutputHandler._get_bool(
+        clientside_persistentkeepalive = InputOutputHandler.get_bool(
             self.TEXT_CLIENT_PERSISTENT_KEEPALIVE, True
         )
 
@@ -341,15 +341,15 @@ Please input the peer's name:"""
 
         iface.add_peer_to_interface(peer)
 
-        InputOutputHandler._print_with_disclaimer(
+        InputOutputHandler.print_with_disclaimer(
             disclaimer="GENERATED PEER CONFIG, PRIVATE KEY WON'T BE SHOWN AGAIN",
-            text=InputOutputHandler._format_peer(
+            text=InputOutputHandler.format_peer(
                 peer, server_pubkey, clientside_endpoint, clientside_persistentkeepalive
             ),
         )
 
     def _get_existing_peer_interactively(self, iface: WireGuardInterface) -> str:
         self._pretty_print_peers(iface)
-        return InputOutputHandler._get_list_entry_interactively(
+        return InputOutputHandler.get_list_entry_interactively(
             [*iface.get_peers_with_name().items()]
         )[0]

@@ -34,7 +34,7 @@ PresharedKey = {presharedkey}
         pass
 
     @staticmethod
-    def _print_with_disclaimer(disclaimer: str, text: str):
+    def print_with_disclaimer(disclaimer: str, text: str):
         width = os.get_terminal_size().columns
 
         disclaimer = disclaimer.upper()
@@ -57,7 +57,7 @@ PresharedKey = {presharedkey}
         print("#" * width, "")
 
     @staticmethod
-    def _pretty_print_peer_with_index(index: int, peer_key: str, peer_dict: dict):
+    def pretty_print_peer_with_index(index: int, peer_key: str, peer_dict: dict):
         text = InputOutputHandler.TEMPLATE_PRETTY_PRINT_PEER.format(
             index=index,
             peer_key=peer_key,
@@ -68,7 +68,7 @@ PresharedKey = {presharedkey}
         print(text)
 
     @staticmethod
-    def _format_peer(
+    def format_peer(
         peer: WgInteractivePeer,
         server_publickey: str,
         endpoint: str,
@@ -96,13 +96,13 @@ PresharedKey = {presharedkey}
         return text
 
     @staticmethod
-    def _get_str_interactively(text: str) -> str:
+    def get_str_interactively(text: str) -> str:
         print(text)
         selection = input(InputOutputHandler.PROMPT)
         return selection.strip()
 
     @staticmethod
-    def _get_interface_listen_port_interactively(
+    def get_interface_listen_port_interactively(
         text: str, illegal_ports: list[int]
     ) -> int:
         print(text)
@@ -128,13 +128,13 @@ PresharedKey = {presharedkey}
                 print("Please try again!\n")
 
     @staticmethod
-    def _get_endpoint_port_interactively(text: str, suggested_default: int) -> int:
+    def get_endpoint_port_interactively(text: str, suggested_default: int) -> int:
         print(text)
 
         port_max = (2**16) - 1
 
         while True:
-            InputOutputHandler._print_list_of_options([suggested_default])
+            InputOutputHandler.print_list_of_options([suggested_default])
 
             selection = input(InputOutputHandler.PROMPT)
 
@@ -156,13 +156,13 @@ PresharedKey = {presharedkey}
                 print("Please try again!\n")
 
     @staticmethod
-    def _get_endpoint_host_interactively(
+    def get_endpoint_host_interactively(
         text: str, suggested_defaults: list[str]
     ) -> str:
         print(text)
 
         while True:
-            InputOutputHandler._print_list_of_options(suggested_defaults)
+            InputOutputHandler.print_list_of_options(suggested_defaults)
 
             selection = input(InputOutputHandler.PROMPT)
 
@@ -188,7 +188,7 @@ PresharedKey = {presharedkey}
                 print("Please try again!\n")
 
     @staticmethod
-    def _get_ip_interface_interactively(
+    def get_ip_interface_interactively(
         text: str, illegal_interfaces: list[(IPv4Interface | IPv6Interface)]
     ) -> IPv4Interface | IPv6Interface:
         print(text)
@@ -214,13 +214,13 @@ PresharedKey = {presharedkey}
             print("Invalid input, please try again\n")
 
     @staticmethod
-    def _get_ip_interfaces_interactively(
+    def get_ip_interfaces_interactively(
         text: str, suggested_defaults: list[IPv4Interface | IPv6Interface]
     ) -> list[(IPv4Interface | IPv6Interface)]:
         print(text)
 
         while True:
-            InputOutputHandler._print_list_of_options(suggested_defaults)
+            InputOutputHandler.print_list_of_options(suggested_defaults)
 
             selection = input(InputOutputHandler.PROMPT)
 
@@ -254,13 +254,13 @@ PresharedKey = {presharedkey}
             print("Invalid input, please try again\n")
 
     @staticmethod
-    def _get_ip_networks_interactively(
+    def get_ip_networks_interactively(
         text: str, suggested_defaults: list[IPv4Network | IPv6Network]
     ) -> list[(IPv4Network | IPv6Network)]:
         print(text)
 
         while True:
-            InputOutputHandler._print_list_of_options(suggested_defaults)
+            InputOutputHandler.print_list_of_options(suggested_defaults)
 
             selection = input(InputOutputHandler.PROMPT)
 
@@ -294,7 +294,7 @@ PresharedKey = {presharedkey}
             print("Invalid input, please try again\n")
 
     @staticmethod
-    def _get_bool(text: str, default: bool = False) -> bool:
+    def get_bool(text: str, default: bool = False) -> bool:
         print(text)
 
         prompt = "[Y/n]"
@@ -322,7 +322,7 @@ PresharedKey = {presharedkey}
                 pass
 
     @staticmethod
-    def _get_list_entry_interactively(options: list):
+    def get_list_entry_interactively(options: list):
 
         while True:
             selection = input(InputOutputHandler.PROMPT)
@@ -339,12 +339,12 @@ PresharedKey = {presharedkey}
                 print("Please try again!\n")
 
     @staticmethod
-    def _print_list_of_options(opts: list) -> None:
+    def print_list_of_options(opts: list) -> None:
         for index, value in enumerate(opts):
             print("[%i] %s" % (index, value))
 
     @staticmethod
-    def _print_interface_status(
+    def print_interface_status(
         iface: WireGuardInterface, systemd_active: bool
     ) -> None:
         if iface.is_running():
@@ -369,7 +369,7 @@ PresharedKey = {presharedkey}
             print(f"Seems like host doesn't use systemd, skipping check for service")
 
     @staticmethod
-    def _get_next_free_ips(
+    def get_next_free_ips(
         iface: WireGuardInterface,
     ) -> list[IPv4Interface | IPv6Interface]:
         # 255.255.255.255 as an int
@@ -433,7 +433,7 @@ PresharedKey = {presharedkey}
         return free_ips
 
     @staticmethod
-    def _get_peer_recommended_allowed_ips(
+    def get_peer_recommended_allowed_ips(
         iface: WireGuardInterface,
     ) -> list[IPv4Network | IPv6Network]:
         suggested_networks = []
