@@ -116,6 +116,11 @@ class WireGuardInterface:
         
         self._save()
         
+    
+    def delete_peer(self, peer_key: str):
+        self.iface.del_peer(peer_key)
+        self._save()
+        
 
     def _save(self):
         self.iface.write_file(self.iface_conf_path)

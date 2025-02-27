@@ -159,8 +159,7 @@ PresharedKey = {presharedkey}
             pass
         
         elif interface_action == CliHandlerAction.DELETE:
-            # deletePeerFromInterface(wc, selectedWGName, absWGPath)
-            pass
+            self._delete_peer_interactively(wginterface)
         
         elif interface_action == CliHandlerAction.FLIP_SYSTEMD:
             print(f"Flipping enabled status for '{wginterface.ifacename}'")
@@ -249,6 +248,11 @@ PresharedKey = {presharedkey}
         name = self._get_str_interactively(self.TEXT_RENAME_NEW_NAME)
         
         iface.rename_peer(peer_key, name)
+    
+    
+    def _delete_peer_interactively(self, iface: WireGuardInterface):
+        peer_key = self._get_existing_peer_interactively(iface)
+        iface.delete_peer(peer_key)
     
         
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
