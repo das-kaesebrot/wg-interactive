@@ -86,8 +86,7 @@ AllowedIPs = {allowedips}
 PresharedKey = {presharedkey}
 {additional_options}"""
 
-    TEMPLATE_PRETTY_PRINT_PEER = """
-[{index:02d}] PublicKey: {peer_key}
+    TEMPLATE_PRETTY_PRINT_PEER = """[{index:02d}] PublicKey: {peer_key}
      AllowedIPs: {allowed_ips}
      Name: {name}
 """
