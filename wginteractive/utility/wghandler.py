@@ -13,19 +13,20 @@ class WireGuardHandler:
     def __init__(self, wireguard_config_dir: str) -> None:
         self._wireguard_config_dir = wireguard_config_dir
 
-    def get_interfaces(self) -> dict[str, WireGuardInterface]:
-        if not self.interfaces:
-            _ = []
-            extension = f".{self.WIREGUARD_CONFIG_EXTENSION}"
+    def refresh_interfaces(self) -> dict[str, WireGuardInterface]:
+        self.interfaces = {}
+        
+        _ = []
+        extension = f".{self.WIREGUARD_CONFIG_EXTENSION}"
 
-            for file in os.listdir(self._wireguard_config_dir):
-                if file.endswith(extension):
-                    _.append(file[: -len(extension)])
+        for file in os.listdir(self._wireguard_config_dir):
+            if file.endswith(extension):
+                _.append(file[: -len(extension)])
 
-            _.sort()
-            for config in _:
-                self.interfaces[config] = WireGuardInterface(
-                    config, self._wireguard_config_dir
-                )
+        _.sort()
+        for config in _:
+            self.interfaces[config] = WireGuardInterface(
+                config, self._wireguard_config_dir
+            )
 
         return self.interfaces

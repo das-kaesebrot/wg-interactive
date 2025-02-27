@@ -77,18 +77,23 @@ Please input the peer's name:"""
         self._wghandler = WireGuardHandler(self._wireguard_config_dir)
         self._refresh_interfaces()
 
-        counter = 0
-        for iface in self._wginterfaces.keys():
-            self.ACTIONS_MENU_ROOT[str(counter)] = iface
-            counter += 1
-
         self.USE_SYSTEMD = Systemd.host_is_using_systemd()
 
         if not self.USE_SYSTEMD:
             self.ACTIONS_MENU.pop(CliHandlerAction.FLIP_SYSTEMD)
 
     def _refresh_interfaces(self):
-        self._wginterfaces = self._wghandler.get_interfaces()
+        self._wginterfaces = self._wghandler.refresh_interfaces()
+        
+        init = self.ACTIONS_MENU_ROOT.pop(CliHandlerAction.INIT_NEW_IFACE)
+        
+        self.ACTIONS_MENU_ROOT = {}
+        self.ACTIONS_MENU_ROOT[CliHandlerAction.INIT_NEW_IFACE] = init
+
+        counter = 0
+        for iface in self._wginterfaces.keys():
+            self.ACTIONS_MENU_ROOT[str(counter)] = iface
+            counter += 1
 
     def handle(self) -> None:
                 
