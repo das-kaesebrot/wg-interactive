@@ -119,8 +119,21 @@ class WireGuardInterface:
             self.iface.add_attr(key=peer_key, attr=attr, value=value)
         
         self._save()
-        
     
+    
+    def replace_peer_publickey(self, old_peer_key: str, new_peer_key: str):
+        peer = self.get_peer_with_name(old_peer_key)
+        
+        self.iface.del_peer(old_peer_key)
+        self.iface.add_peer(key=new_peer_key, leading_comment=f"# {peer.get("name")}")
+        
+        for attr, value in peer.items():
+            if attr == "PublicKey":
+                continue
+            
+            self.iface.add_attr(key=new_peer_key, attr=attr, value=value)
+        
+        self._save()
     def delete_peer(self, peer_key: str):
         self.iface.del_peer(peer_key)
         self._save()
