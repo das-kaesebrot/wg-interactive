@@ -5,13 +5,13 @@ import logging
 import ipaddress
 from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
 from termcolor import colored
-import validators
 
 from ..classes.config import Config
 from ..classes.wgpeer import WgInteractivePeer
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
 from ..utility.systemd import Systemd
 from ..utility.serverinfo import ServerInfo
+from ..utility.validation import Validation
 from ..enums.clihandler_action import CliHandlerAction
 
 
@@ -485,7 +485,7 @@ PresharedKey = {presharedkey}
 
             try:
                 try:
-                    if not validators.domain(selection):
+                    if not Validation.validate_domain(selection):
                         retval = str(ipaddress.ip_address(selection))
                     else:
                         retval = str(selection)
