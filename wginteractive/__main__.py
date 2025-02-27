@@ -1,3 +1,3 @@
-from .entrypoint import main
+from .wginteractive import main
 
 main()
