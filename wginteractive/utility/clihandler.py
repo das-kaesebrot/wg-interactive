@@ -28,6 +28,7 @@ class CliHandler:
         CliHandlerAction.NEWPSK: "Generate new preshared key between peer and server",
         CliHandlerAction.DELETE: "Delete peer",
         CliHandlerAction.FLIP_SYSTEMD: "Flip enabled state for wg-quick systemd service",
+        CliHandlerAction.DELETE_IFACE: "Delete WireGuard server",
         CliHandlerAction.GO_UP: "Go back to previous menu",
     }
 
@@ -92,6 +93,7 @@ Please input the peer's name:"""
     def handle(self) -> None:
                 
         while True:
+            self._refresh_interfaces()
             iface_or_init = self._get_initial_interface_or_action_and_validate()
 
             if iface_or_init.strip().lower() == CliHandlerAction.INIT_NEW_IFACE:
@@ -135,7 +137,11 @@ Please input the peer's name:"""
                 elif interface_action == CliHandlerAction.FLIP_SYSTEMD:
                     print(f"Flipping enabled status for '{wginterface.ifacename}'")
                     wginterface.flip_systemd_status()
-                    
+                
+                elif interface_action == CliHandlerAction.DELETE_IFACE:
+                    self._delete_interface_interactively(wginterface)
+                    done = True
+                                    
                 elif interface_action == CliHandlerAction.GO_UP:
                     done = True
 
@@ -253,6 +259,15 @@ Please input the peer's name:"""
         name = InputOutputHandler._get_str_interactively(self.TEXT_RENAME_NEW_NAME)
 
         iface.rename_peer(peer_key, name)
+
+    def _delete_interface_interactively(self, iface: WireGuardInterface):
+        if not InputOutputHandler._get_bool("Really delete? This action is permanent!", default=False):
+            return
+        
+        if self.USE_SYSTEMD:
+            iface.disable_systemd_status()
+        
+        os.remove(iface.iface_conf_path)
 
     def _delete_peer_interactively(self, iface: WireGuardInterface):
         peer_key = self._get_existing_peer_interactively(iface)

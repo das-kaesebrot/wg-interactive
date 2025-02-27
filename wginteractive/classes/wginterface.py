@@ -59,6 +59,9 @@ class WireGuardInterface:
 
     def flip_systemd_status(self):
         Systemd.flip_wg_interface_enabled_status(self.ifacename)
+        
+    def disable_systemd_status(self):
+        Systemd.disable_wg_interface(self.ifacename, now=True)
 
     def get_publickey(self) -> str:
         return self._publickey

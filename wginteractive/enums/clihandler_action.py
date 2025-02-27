@@ -9,5 +9,6 @@ class CliHandlerAction(StrEnum):
     NEWPSK = 'p'
     NEWKEY_SERVER = 'ks' # unused
     DELETE = 'd'
+    DELETE_IFACE = 'ds'
     FLIP_SYSTEMD = 's'
     GO_UP = '..'

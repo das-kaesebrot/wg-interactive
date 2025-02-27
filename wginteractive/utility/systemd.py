@@ -26,6 +26,14 @@ class Systemd:
     @staticmethod
     def flip_wg_interface_enabled_status(interface):
         Systemd.flip_enabled_status(f"{Systemd.WG_QUICK_SERVICE}@{interface}", now=True)
+        
+    @staticmethod
+    def disable_wg_interface(interface: str, now: bool):
+        unit = f"{Systemd.WG_QUICK_SERVICE}@{interface}"
+        if os.path.isfile(os.path.join(Systemd.MULTI_USER_TARGET_WANTS_FOLDER, unit)):
+            Systemd.invoke_systemd_command_on_unit(Systemd.CMD_DISABLE, unit)
+            if now:
+                Systemd.stop_unit(unit)
 
     @staticmethod
     def start_unit(unit: str):
