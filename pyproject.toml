@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wg-interactive"
-version = "0.4.1"
+version = "0.5.0"
 
 authors = [
     { name="Julian", email="mail@kaesebrot.eu" }
@@ -23,9 +23,9 @@ classifiers = [
 ]
 
 dependencies=[
-  "wgconfig>=0.2.2",
-  "termcolor>=1.1.0",
-  "netifaces==0.11.0",
+  "wgconfig==0.3.0",
+  "termcolor==2.4.0",
+  "netifaces2==0.0.22",
 ]
 
 [project.urls]
@@ -33,4 +33,4 @@ dependencies=[
 "Bug Tracker" = "https://github.com/das-kaesebrot/wg-interactive/issues"
 
 [project.scripts]
-wg-interactive = "wginteractive.entrypoint:main"
+wg-interactive = "wginteractive.wginteractive:main"
