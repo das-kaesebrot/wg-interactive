@@ -159,7 +159,9 @@ class WireGuardInterface:
     
     
     def _replace_peer_presharedkey(self, peer_key: str, new_presharedkey: str):
-        self.iface.del_attr(peer_key, self.ATTR_PRESHAREDKEY)
+        peer = self.iface.get_peer(peer_key)
+        if self.ATTR_PRESHAREDKEY in peer.keys():
+            self.iface.del_attr(peer_key, self.ATTR_PRESHAREDKEY)
         self.iface.add_attr(peer_key, self.ATTR_PRESHAREDKEY, new_presharedkey)
         
         self._save()
