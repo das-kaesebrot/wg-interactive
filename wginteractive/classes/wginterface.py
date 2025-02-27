@@ -23,6 +23,8 @@ class WireGuardInterface:
 
     iface: wgconfig.WGConfig
     iface_conf_path: str
+    
+    _publickey: str
 
     def __init__(self, ifacename: str, wireguard_basepath: str) -> None:
         self.ifacename = ifacename
@@ -30,6 +32,8 @@ class WireGuardInterface:
         self.iface = wgconfig.WGConfig(self.iface_conf_path)
         self.iface.read_file()
         self._logger = logging.getLogger(self.ifacename)
+        
+        self._publickey = wgexec.get_publickey(self.iface.interface.get("PrivateKey"))
 
     def is_running(self) -> bool:
         if (
