@@ -16,29 +16,19 @@ from ..enums.clihandler_action import CliHandlerAction
 class CliHandler:
     USE_SYSTEMD: bool = False
 
-    PROMPT = "> "
-
     ACTIONS_MENU_ROOT = {
-        CliHandlerAction.INIT_NEW_IFACE: {"desc": "Initialize a new interface"}
+        CliHandlerAction.INIT_NEW_IFACE: "Initialize a new interface",
     }
 
     ACTIONS_MENU = {
-        CliHandlerAction.ADD: {"desc": "Add peer"},
-        CliHandlerAction.LIST: {"desc": "List all peers and return to this menu"},
-        CliHandlerAction.RENAME: {"desc": "Rename peer"},
-        CliHandlerAction.NEWKEY_CLIENT: {"desc": "Generate new keypair for peer"},
-        CliHandlerAction.NEWPSK: {
-            "desc": "Generate new preshared key between peer and server"
-        },
-        CliHandlerAction.DELETE: {
-            "desc": "Delete peer",
-        },
-        CliHandlerAction.FLIP_SYSTEMD: {
-            "desc": "Flip enabled state for wg-quick systemd service",
-        },
-        CliHandlerAction.GO_UP: {
-            "desc": "Go back to previous menu",
-        },
+        CliHandlerAction.ADD: "Add peer",
+        CliHandlerAction.LIST: "List all peers and return to this menu",
+        CliHandlerAction.RENAME: "Rename peer",
+        CliHandlerAction.NEWKEY_CLIENT: "Generate new keypair for peer",
+        CliHandlerAction.NEWPSK: "Generate new preshared key between peer and server",
+        CliHandlerAction.DELETE: "Delete peer",
+        CliHandlerAction.FLIP_SYSTEMD: "Flip enabled state for wg-quick systemd service",
+        CliHandlerAction.GO_UP: "Go back to previous menu",
     }
 
     TEXT_CLIENT_ENDPOINT_PORT = f"""{colored('Endpoint port', attrs=['bold'])}
@@ -88,7 +78,7 @@ Please input the peer's name:"""
 
         counter = 0
         for iface in self._wginterfaces.keys():
-            self.ACTIONS_MENU_ROOT[str(counter)] = {"desc": iface}
+            self.ACTIONS_MENU_ROOT[str(counter)] = iface
             counter += 1
 
         self.USE_SYSTEMD = Systemd.host_is_using_systemd()
@@ -201,13 +191,13 @@ Please input the peer's name:"""
 
         while True:
             for k, v in self.ACTIONS_MENU_ROOT.items():
-                print("[%s] %s" % (k, v.get("desc")))
+                print("[%s] %s" % (k, v))
 
             selection = input(InputOutputHandler.PROMPT)
 
             if selection in self.ACTIONS_MENU_ROOT.keys():
                 print(
-                    f"Selected operation/interface: {self.ACTIONS_MENU_ROOT.get(selection).get('desc')}\n"
+                    f"Selected operation/interface: {self.ACTIONS_MENU_ROOT.get(selection)}\n"
                 )
                 return selection
 
@@ -235,13 +225,13 @@ Please input the peer's name:"""
 
         while True:
             for k, v in self.ACTIONS_MENU.items():
-                print("[%s] %s" % (k, v.get("desc")))
+                print("[%s] %s" % (k, v))
 
             selection = input(InputOutputHandler.PROMPT)
 
             if selection in self.ACTIONS_MENU.keys():
                 print(
-                    f"Selected operation: {self.ACTIONS_MENU.get(selection).get('desc')}\n"
+                    f"Selected operation: {self.ACTIONS_MENU.get(selection)}\n"
                 )
                 return selection
 
