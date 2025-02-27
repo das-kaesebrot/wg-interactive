@@ -100,8 +100,8 @@ class WireGuardInterface:
             
         return peers
     
-    def get_peer_with_name(self, peer_key: str) -> dict:
-        peer = self.iface.get_peer(peer_key, include_details=True)
+    def get_peer_with_name(self, peer_key: str, include_details: bool = True) -> dict:
+        peer = self.iface.get_peer(peer_key, include_details=include_details)
         
         name = None
             
