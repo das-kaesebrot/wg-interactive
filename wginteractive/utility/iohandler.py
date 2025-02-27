@@ -32,7 +32,7 @@ PresharedKey = {presharedkey}
 
     def __init__(self):
         pass
-    
+
     @staticmethod
     def _print_with_disclaimer(disclaimer: str, text: str):
         width = os.get_terminal_size().columns
@@ -131,6 +131,8 @@ PresharedKey = {presharedkey}
     def _get_endpoint_port_interactively(text: str, suggested_default: int) -> int:
         print(text)
 
+        port_max = (2**16) - 1
+
         while True:
             InputOutputHandler._print_list_of_options([suggested_default])
 
@@ -139,9 +141,9 @@ PresharedKey = {presharedkey}
             try:
                 selection = int(selection)
 
-                if selection < 0 or selection > 65535:
+                if selection < 0 or selection > port_max:
                     raise ValueError(
-                        "Port value out of range! Must be between 0 and 65535"
+                        f"Port value out of range! Must be between 0 and {port_max}"
                     )
 
                 if selection == 0:
@@ -340,9 +342,11 @@ PresharedKey = {presharedkey}
     def _print_list_of_options(opts: list) -> None:
         for index, value in enumerate(opts):
             print("[%i] %s" % (index, value))
-            
+
     @staticmethod
-    def _print_interface_status(iface: WireGuardInterface, systemd_active: bool) -> None:
+    def _print_interface_status(
+        iface: WireGuardInterface, systemd_active: bool
+    ) -> None:
         if iface.is_running():
             print(
                 f"{colored(iface.ifacename, attrs=['bold'])} is {colored('active', color='green')}. Auto reload after changes enabled."
