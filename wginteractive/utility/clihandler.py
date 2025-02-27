@@ -98,9 +98,9 @@ PresharedKey = {presharedkey}
 """
 
     TEMPLATE_PRETTY_PRINT_PEER = """
-[{index}] PublicKey: {peer_key}
-    AllowedIPs: {allowed_ips}
-    Name: {name}
+[{index:02d}] PublicKey: {peer_key}
+     AllowedIPs: {allowed_ips}
+     Name: {name}
 """
 
     _wghandler: WireGuardHandler
