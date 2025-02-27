@@ -116,11 +116,9 @@ PresharedKey = {presharedkey}
     def _refresh_interfaces(self):
         self._wginterfaces = self._wghandler.get_interfaces()
 
-    def handle(self) -> None:        
-        looping = True
-        
-        while looping:
-            looping = False
+    def handle(self) -> None:
+                
+        while True:
             iface_or_init = self._get_initial_interface_or_action_and_validate()
 
             if iface_or_init.strip().lower() == CliHandlerAction.INIT_NEW_IFACE:
@@ -167,7 +165,6 @@ PresharedKey = {presharedkey}
                     
                 elif interface_action == CliHandlerAction.GO_UP:
                     done = True
-                    looping = True
 
     def _create_new_interface(self) -> WireGuardInterface:
         os.makedirs(name=self.config.wireguard_conf_dir, mode=0o600, exist_ok=True)
