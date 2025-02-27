@@ -20,6 +20,13 @@ class WireGuardInterface:
     CMD_WG_SETCONF = (
         "setconf"  # requires an additional filename argument or piping into the command
     )
+    
+    ATTR_PUBLICKEY = "PublicKey"
+    ATTR_PRIVATEKEY = "PrivateKey"
+    ATTR_PRESHAREDKEY = "PresharedKey"
+    ATTR_ADDRESS = "Address"
+    ATTR_ALLOWEDIPS = "AllowedIPs"
+    ATTR_LISTENPORT = "ListenPort"
 
     iface: wgconfig.WGConfig
     iface_conf_path: str
@@ -33,7 +40,7 @@ class WireGuardInterface:
         self.iface.read_file()
         self._logger = logging.getLogger(self.ifacename)
         
-        self._publickey = wgexec.get_publickey(self.iface.interface.get("PrivateKey"))
+        self._publickey = wgexec.get_publickey(self.iface.interface.get(self.ATTR_PRIVATEKEY))
 
     def is_running(self) -> bool:
         if (
@@ -55,10 +62,10 @@ class WireGuardInterface:
         return self._publickey
 
     def get_server_ip_interface(self) -> IPv4Interface | IPv6Interface:
-        return ip_interface(self.iface.interface.get("Address"))
+        return ip_interface(self.iface.interface.get(self.ATTR_ADDRESS))
 
     def get_listen_port(self) -> int | None:
-        listenport_str = self.iface.interface.get("ListenPort")
+        listenport_str = self.iface.interface.get(self.ATTR_LISTENPORT)
 
         if listenport_str:
             return int(listenport_str)
@@ -81,8 +88,8 @@ class WireGuardInterface:
         )
 
         self.iface.add_peer(peer.public_key, f"# {peer.name}")
-        self.iface.add_attr(peer.public_key, "AllowedIPs", allowedips_str)
-        self.iface.add_attr(peer.public_key, "PresharedKey", peer.preshared_key)
+        self.iface.add_attr(peer.public_key, self.ATTR_ALLOWEDIPS, allowedips_str)
+        self.iface.add_attr(peer.public_key, self.ATTR_PRESHAREDKEY, peer.preshared_key)
         self._save()
         
     def get_peers_with_name(self):
@@ -113,7 +120,7 @@ class WireGuardInterface:
         self.iface.add_peer(key=peer_key, leading_comment=f"# {name}")
         
         for attr, value in peer.items():
-            if attr == "PublicKey":
+            if attr == self.ATTR_PUBLICKEY:
                 continue
             
             self.iface.add_attr(key=peer_key, attr=attr, value=value)
@@ -128,7 +135,7 @@ class WireGuardInterface:
         self.iface.add_peer(key=new_peer_key, leading_comment=f"# {peer.get("name")}")
         
         for attr, value in peer.items():
-            if attr == "PublicKey":
+            if attr == self.ATTR_PUBLICKEY:
                 continue
             
             self.iface.add_attr(key=new_peer_key, attr=attr, value=value)
@@ -137,8 +144,8 @@ class WireGuardInterface:
     
     
     def replace_peer_presharedkey(self, peer_key: str, new_presharedkey: str):
-        self.iface.del_attr(peer_key, "PresharedKey")
-        self.iface.add_attr(peer_key, "PresharedKey", new_presharedkey)
+        self.iface.del_attr(peer_key, self.ATTR_PRESHAREDKEY)
+        self.iface.add_attr(peer_key, self.ATTR_PRESHAREDKEY, new_presharedkey)
         
         self._save()
         
@@ -177,9 +184,9 @@ class WireGuardInterface:
         iface = wgconfig.WGConfig(iface_conf_path)
         privkey = wgexec.generate_privatekey()
         iface.initialize_file()
-        iface.add_attr(key=None, attr="Address", value=address)
-        iface.add_attr(key=None, attr="ListenPort", value=listen_port)
-        iface.add_attr(key=None, attr="PrivateKey", value=privkey)
+        iface.add_attr(key=None, attr=WireGuardInterface.ATTR_ADDRESS, value=address)
+        iface.add_attr(key=None, attr=WireGuardInterface.ATTR_LISTENPORT, value=listen_port)
+        iface.add_attr(key=None, attr=WireGuardInterface.ATTR_PRIVATEKEY, value=privkey)
         iface.write_file(iface_conf_path)
 
         return WireGuardInterface(
