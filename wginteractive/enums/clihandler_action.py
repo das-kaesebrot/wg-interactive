@@ -6,6 +6,7 @@ class CliHandlerAction(StrEnum):
     LIST = 'l'
     RENAME = 'r'
     NEWKEY_CLIENT = 'k'
+    NEWPSK = 'p'
     NEWKEY_SERVER = 'ks' # unused
     DELETE = 'd'
     FLIP_SYSTEMD = 's'

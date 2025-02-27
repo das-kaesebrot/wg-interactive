@@ -44,6 +44,10 @@ class CliHandler:
             {
                 'desc': 'Generate new keypair for peer'
             },
+            CliHandlerAction.NEWPSK:
+            {
+                'desc': 'Generate new preshared key between peer and server'
+            },
             CliHandlerAction.DELETE:
             {
                 'desc': 'Delete peer',
