@@ -66,6 +66,7 @@ jobs:
         with:
           packages-dir: dist/
           repository-url: https://test.pypi.org/legacy/
+          verbose: true
 
   pypi-publish:
     runs-on: ubuntu-latest
@@ -97,3 +98,4 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          verbose: true
