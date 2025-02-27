@@ -3,15 +3,13 @@ import os
 import re
 import logging
 import ipaddress
-from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
 from termcolor import colored
 
-from ..classes.config import Config
 from ..classes.wgpeer import WgInteractivePeer
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
+from .iohandler import InputOutputHandler
 from ..utility.systemd import Systemd
 from ..utility.serverinfo import ServerInfo
-from ..utility.validation import Validation
 from ..enums.clihandler_action import CliHandlerAction
 
 
@@ -75,31 +73,17 @@ Please input the peer's name:"""
         "Add 'PersistentKeepalive = 25' to client config?"
     )
 
-    TEMPLATE_PEER_CONF = """[Interface]
-Address = {address}
-PrivateKey = {privatekey}
-
-[Peer]
-PublicKey = {publickey}
-Endpoint = {endpoint}
-AllowedIPs = {allowedips}
-PresharedKey = {presharedkey}
-{additional_options}"""
-
-    TEMPLATE_PRETTY_PRINT_PEER = """[{index:02d}] PublicKey: {peer_key}
-     AllowedIPs: {allowed_ips}
-     Name: {name}
-"""
-
     _wghandler: WireGuardHandler
     _wginterfaces: dict[str, WireGuardInterface]
 
     _logger: logging.Logger
+    
+    _wireguard_config_dir: str
 
-    def __init__(self) -> None:
+    def __init__(self, wireguard_config_dir: str) -> None:
         self._logger = logging.getLogger(__name__)
-        self.config = Config()
-        self._wghandler = WireGuardHandler(self.config)
+        self._wireguard_config_dir = wireguard_config_dir
+        self._wghandler = WireGuardHandler(self._wireguard_config_dir)
         self._refresh_interfaces()
 
         counter = 0
@@ -130,7 +114,7 @@ PresharedKey = {presharedkey}
             wginterface_key = list(self._wginterfaces)[int(iface_or_init)]
             wginterface = self._wginterfaces.get(wginterface_key)
 
-            self._print_interface_status(wginterface)
+            InputOutputHandler._print_interface_status(wginterface, self.USE_SYSTEMD)
             
             done = False
                     
@@ -166,7 +150,7 @@ PresharedKey = {presharedkey}
                     done = True
 
     def _create_new_interface(self) -> WireGuardInterface:
-        os.makedirs(name=self.config.wireguard_conf_dir, mode=0o600, exist_ok=True)
+        os.makedirs(name=self._wireguard_config_dir, mode=0o600, exist_ok=True)
 
         illegal_names = list(self._wginterfaces.keys())
         illegal_interfaces = list(
@@ -188,24 +172,24 @@ PresharedKey = {presharedkey}
         )
         print(f"Selected interface name: '{iface_name}'\n")
 
-        iface_ip_interface = self._get_ip_interface_interactively(
+        iface_ip_interface = InputOutputHandler._get_ip_interface_interactively(
             f"Please enter an IP address and subnet for the new interface:\nIllegal interfaces: {illegal_interfaces}",
             illegal_interfaces=illegal_interfaces,
         )
         print(f"Selected ip address: '{iface_ip_interface}'\n")
 
-        iface_port = self._get_interface_listen_port_interactively(
+        iface_port = InputOutputHandler._get_interface_listen_port_interactively(
             f"Please enter a listen port for the new interface:\nIllegal ports: {illegal_ports}",
             illegal_ports=illegal_ports,
         )
         print(f"Selected listen port: {iface_port}\n")
 
         print(
-            f"Creating new WireGuard interface at '{os.path.join(self.config.wireguard_conf_dir, iface_name + '.conf')}'"
+            f"Creating new WireGuard interface at '{os.path.join(self._wireguard_config_dir, iface_name + '.conf')}'"
         )
 
         return WireGuardInterface.create_new(
-            wireguard_basepath=self.config.wireguard_conf_dir,
+            wireguard_basepath=self._wireguard_config_dir,
             ifacename=iface_name,
             address=iface_ip_interface,
             listen_port=iface_port,
@@ -219,7 +203,7 @@ PresharedKey = {presharedkey}
             for k, v in self.ACTIONS_MENU_ROOT.items():
                 print("[%s] %s" % (k, v.get("desc")))
 
-            selection = input(CliHandler.PROMPT)
+            selection = input(InputOutputHandler.PROMPT)
 
             if selection in self.ACTIONS_MENU_ROOT.keys():
                 print(
@@ -233,7 +217,7 @@ PresharedKey = {presharedkey}
         self, text: str, illegal_names: list[str]
     ) -> str:
         while True:
-            iface_name = self._get_str_interactively(text)
+            iface_name = InputOutputHandler._get_str_interactively(text)
 
             if iface_name in illegal_names:
                 print("Interface name already taken, please choose another name!\n")
@@ -253,7 +237,7 @@ PresharedKey = {presharedkey}
             for k, v in self.ACTIONS_MENU.items():
                 print("[%s] %s" % (k, v.get("desc")))
 
-            selection = input(CliHandler.PROMPT)
+            selection = input(InputOutputHandler.PROMPT)
 
             if selection in self.ACTIONS_MENU.keys():
                 print(
@@ -271,12 +255,12 @@ PresharedKey = {presharedkey}
         peers = iface.get_peers_with_name()
         index = 0
         for peer_key, peer in peers.items():
-            self._pretty_print_peer_with_index(index, peer_key, peer)
+            InputOutputHandler._pretty_print_peer_with_index(index, peer_key, peer)
             index += 1
 
     def _rename_peer_interactively(self, iface: WireGuardInterface):
         peer_key = self._get_existing_peer_interactively(iface)
-        name = self._get_str_interactively(self.TEXT_RENAME_NEW_NAME)
+        name = InputOutputHandler._get_str_interactively(self.TEXT_RENAME_NEW_NAME)
 
         iface.rename_peer(peer_key, name)
 
@@ -288,7 +272,7 @@ PresharedKey = {presharedkey}
         peer_key = self._get_existing_peer_interactively(iface)
         peer_privatekey = iface.regenerate_peer_keypair(peer_key)
 
-        self._print_with_disclaimer(
+        InputOutputHandler._print_with_disclaimer(
             disclaimer="NEW PRIVATE KEY, VALUE WON'T BE SHOWN AGAIN",
             text=peer_privatekey,
         )
@@ -297,13 +281,13 @@ PresharedKey = {presharedkey}
         peer_key = self._get_existing_peer_interactively(iface)
         presharedkey = iface.regenerate_presharedkey(peer_key)
 
-        self._print_with_disclaimer(disclaimer="NEW PRESHARED KEY", text=presharedkey)
+        InputOutputHandler._print_with_disclaimer(disclaimer="NEW PRESHARED KEY", text=presharedkey)
 
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
-        clientside_endpoint_port = self._get_endpoint_port_interactively(
+        clientside_endpoint_port = InputOutputHandler._get_endpoint_port_interactively(
             self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get("ListenPort"))
         )
-        clientside_endpoint_host = self._get_endpoint_host_interactively(
+        clientside_endpoint_host = InputOutputHandler._get_endpoint_host_interactively(
             self.TEXT_CLIENT_ENDPOINT_HOST, ServerInfo._get_recommended_endpoint_hosts()
         )
 
@@ -321,24 +305,18 @@ PresharedKey = {presharedkey}
 
         print(f"Selected endpoint: {colored(clientside_endpoint, attrs=['bold'])}\n")
 
-        serverside_peername = self._get_str_interactively(self.TEXT_SERVER_PEER_NAME)
+        serverside_peername = InputOutputHandler._get_str_interactively(self.TEXT_SERVER_PEER_NAME)
 
-        peerfile_path = os.path.join(
-            self.config.peers_output_dir, iface.ifacename, serverside_peername + ".conf"
+        serverside_allowedips = InputOutputHandler._get_ip_interfaces_interactively(
+            self.TEXT_SERVER_ALLOWEDIPS, InputOutputHandler._get_next_free_ips(iface)
         )
-
-        print(f"Peer file will be written to: {peerfile_path}\n")
-
-        serverside_allowedips = self._get_ip_interfaces_interactively(
-            self.TEXT_SERVER_ALLOWEDIPS, self._get_next_free_ips(iface)
-        )
-        clientside_allowedips = self._get_ip_networks_interactively(
-            self.TEXT_CLIENT_ALLOWEDIPS, self._get_peer_recommended_allowed_ips(iface)
+        clientside_allowedips = InputOutputHandler._get_ip_networks_interactively(
+            self.TEXT_CLIENT_ALLOWEDIPS, InputOutputHandler._get_peer_recommended_allowed_ips(iface)
         )
 
         client_ip = serverside_allowedips[0]
 
-        clientside_persistentkeepalive = self._get_bool(
+        clientside_persistentkeepalive = InputOutputHandler._get_bool(
             self.TEXT_CLIENT_PERSISTENT_KEEPALIVE, True
         )
 
@@ -350,427 +328,15 @@ PresharedKey = {presharedkey}
 
         iface.add_peer_to_interface(peer)
 
-        self._print_with_disclaimer(
+        InputOutputHandler._print_with_disclaimer(
             disclaimer="GENERATED PEER CONFIG, PRIVATE KEY WON'T BE SHOWN AGAIN",
-            text=self._format_peer(
+            text=InputOutputHandler._format_peer(
                 peer, server_pubkey, clientside_endpoint, clientside_persistentkeepalive
             ),
         )
 
     def _get_existing_peer_interactively(self, iface: WireGuardInterface) -> str:
         self._pretty_print_peers(iface)
-        return self._get_list_entry_interactively(
+        return InputOutputHandler._get_list_entry_interactively(
             [*iface.get_peers_with_name().items()]
         )[0]
-
-    @staticmethod
-    def _print_with_disclaimer(disclaimer: str, text: str):
-        width = os.get_terminal_size().columns
-
-        disclaimer = disclaimer.upper()
-
-        padded_chars = ((width - len(disclaimer)) // 2) - 1
-
-        # clip below 0
-        padded_chars = max(padded_chars, 0)
-
-        padded_chars_right = padded_chars
-
-        if ((width - len(disclaimer)) % 2) == 1:
-            padded_chars_right += 1
-
-        print("#" * width)
-        print("#" * padded_chars + f" {disclaimer} " + "#" * padded_chars_right)
-        print("#" * width, "")
-        print(text)
-        print()
-        print("#" * width, "")
-
-    @staticmethod
-    def _pretty_print_peer_with_index(index: int, peer_key: str, peer_dict: dict):
-        text = CliHandler.TEMPLATE_PRETTY_PRINT_PEER.format(
-            index=index,
-            peer_key=peer_key,
-            allowed_ips=peer_dict.get("AllowedIPs"),
-            name=peer_dict.get("name"),
-        )
-
-        print(text)
-
-    @staticmethod
-    def _format_peer(
-        peer: WgInteractivePeer,
-        server_publickey: str,
-        endpoint: str,
-        persistentkeepalive: bool,
-    ):
-        additional_options = ""
-
-        if persistentkeepalive:
-            additional_options = "PersistentKeepalive = 25"
-
-        allowedips_str = ",".join(
-            map(lambda iface: iface.compressed, peer.client_allowed_ips)
-        )
-
-        text = CliHandler.TEMPLATE_PEER_CONF.format(
-            address=peer.primary_ip.compressed,
-            privatekey=peer.private_key,
-            publickey=server_publickey,
-            presharedkey=peer.preshared_key,
-            endpoint=endpoint,
-            allowedips=allowedips_str,
-            additional_options=additional_options,
-        )
-
-        return text
-
-    @staticmethod
-    def _get_str_interactively(text: str) -> str:
-        print(text)
-        selection = input(CliHandler.PROMPT)
-        return selection.strip()
-
-    @staticmethod
-    def _get_interface_listen_port_interactively(
-        text: str, illegal_ports: list[int]
-    ) -> int:
-        print(text)
-
-        while True:
-            selection = input(CliHandler.PROMPT)
-
-            try:
-                selection = int(selection)
-
-                if selection < 0 or selection > 65535:
-                    raise ValueError(
-                        "Port value out of range! Must be between 0 and 65535"
-                    )
-
-                if selection in illegal_ports:
-                    raise ValueError("Port already in use by a different interface!")
-
-                return selection
-
-            except ValueError as e:
-                logging.getLogger(__name__).exception("Invalid input")
-                print("Please try again!\n")
-
-    @staticmethod
-    def _get_endpoint_port_interactively(text: str, suggested_default: int) -> int:
-        print(text)
-
-        while True:
-            CliHandler._print_list_of_options([suggested_default])
-
-            selection = input(CliHandler.PROMPT)
-
-            try:
-                selection = int(selection)
-
-                if selection < 0 or selection > 65535:
-                    raise ValueError(
-                        "Port value out of range! Must be between 0 and 65535"
-                    )
-
-                if selection == 0:
-                    selection = suggested_default
-
-                return selection
-
-            except ValueError as e:
-                logging.getLogger(__name__).exception("Invalid input")
-                print("Please try again!\n")
-
-    @staticmethod
-    def _get_endpoint_host_interactively(
-        text: str, suggested_defaults: list[str]
-    ) -> str:
-        print(text)
-
-        while True:
-            CliHandler._print_list_of_options(suggested_defaults)
-
-            selection = input(CliHandler.PROMPT)
-
-            try:
-                try:
-                    if not Validation.validate_domain(selection):
-                        retval = str(ipaddress.ip_address(selection))
-                    else:
-                        retval = str(selection)
-
-                    return retval
-                except:
-                    pass
-
-                selection = int(selection)
-
-                retval = suggested_defaults[selection]
-
-                return retval
-
-            except ValueError as e:
-                logging.getLogger(__name__).exception("Invalid input")
-                print("Please try again!\n")
-
-    @staticmethod
-    def _get_ip_interface_interactively(
-        text: str, illegal_interfaces: list[(IPv4Interface | IPv6Interface)]
-    ) -> IPv4Interface | IPv6Interface:
-        print(text)
-
-        while True:
-            selection = input(CliHandler.PROMPT)
-
-            try:
-                iface = ipaddress.ip_interface(selection.strip())
-
-                if iface in illegal_interfaces:
-                    raise ValueError(
-                        "IP range already in use in a different WireGuard interface!"
-                    )
-
-                print(f"Selected interface: {iface}\n")
-
-                return iface
-
-            except ValueError as e:
-                print(e)
-
-            print("Invalid input, please try again\n")
-
-    @staticmethod
-    def _get_ip_interfaces_interactively(
-        text: str, suggested_defaults: list[IPv4Interface | IPv6Interface]
-    ) -> list[(IPv4Interface | IPv6Interface)]:
-        print(text)
-
-        while True:
-            CliHandler._print_list_of_options(suggested_defaults)
-
-            selection = input(CliHandler.PROMPT)
-
-            try:
-                selection = int(selection)
-
-                retval = [suggested_defaults[selection]]
-
-                print(f"Selected interface(s): {retval}\n")
-
-                return retval
-
-            except ValueError as e:
-                pass
-
-            try:
-                selection_arr = selection.split(",")
-
-                retval = []
-
-                for entry in selection_arr:
-                    retval.append(ipaddress.ip_interface(entry.strip()))
-
-                print(f"Selected interface(s): {retval}\n")
-
-                return retval
-
-            except ValueError as e:
-                pass
-
-            print("Invalid input, please try again\n")
-
-    @staticmethod
-    def _get_ip_networks_interactively(
-        text: str, suggested_defaults: list[IPv4Network | IPv6Network]
-    ) -> list[(IPv4Network | IPv6Network)]:
-        print(text)
-
-        while True:
-            CliHandler._print_list_of_options(suggested_defaults)
-
-            selection = input(CliHandler.PROMPT)
-
-            try:
-                selection = int(selection)
-
-                retval = [suggested_defaults[selection]]
-
-                print(f"Selected network(s): {retval}\n")
-
-                return retval
-
-            except ValueError as e:
-                pass
-
-            try:
-                selection_arr = selection.split(",")
-
-                retval = []
-
-                for entry in selection_arr:
-                    retval.append(ipaddress.ip_network(entry.strip()))
-
-                print(f"Selected network(s): {retval}\n")
-
-                return retval
-
-            except ValueError as e:
-                pass
-
-            print("Invalid input, please try again\n")
-
-    @staticmethod
-    def _get_bool(text: str, default: bool = False) -> bool:
-        print(text)
-
-        prompt = "[Y/n]"
-
-        if not default:
-            prompt = "[y/N]"
-
-        prompt += f" {CliHandler.PROMPT}"
-
-        while True:
-            selection = input(prompt)
-
-            try:
-                selection = selection.lower()
-
-                if selection == "":
-                    return default
-
-                if selection not in ["y", "n"]:
-                    raise ValueError("Input needs to be either y or n")
-
-                return selection == "y"
-
-            except ValueError:
-                pass
-
-    @staticmethod
-    def _get_list_entry_interactively(options: list):
-
-        while True:
-            selection = input(CliHandler.PROMPT)
-
-            try:
-                selection = int(selection)
-
-                retval = options[selection]
-
-                return retval
-
-            except ValueError as e:
-                logging.getLogger(__name__).exception("Invalid input")
-                print("Please try again!\n")
-
-    @staticmethod
-    def _print_list_of_options(opts: list) -> None:
-        for index, value in enumerate(opts):
-            print("[%i] %s" % (index, value))
-
-    def _print_interface_status(self, iface: WireGuardInterface) -> None:
-        if iface.is_running():
-            print(
-                f"{colored(iface.ifacename, attrs=['bold'])} is {colored('active', color='green')}. Auto reload after changes enabled."
-            )
-        else:
-            print(
-                f"{colored(iface.ifacename, attrs=['bold'])} is {colored('not active', color='red')}. Skipping auto reload after changes are made."
-            )
-
-        if self.USE_SYSTEMD:
-            if iface.is_enabled_on_systemd():
-                print(
-                    f"Service {colored(f'{Systemd.WG_QUICK_SERVICE}@{iface.ifacename}', attrs=['bold'])} is {colored('enabled', color='green')}"
-                )
-            else:
-                print(
-                    f"Service {colored(f'{Systemd.WG_QUICK_SERVICE}@{iface.ifacename}', attrs=['bold'])} is {colored('not enabled', color='red')}"
-                )
-        else:
-            print(f"Seems like host doesn't use systemd, skipping check for service")
-
-    @staticmethod
-    def _get_next_free_ips(
-        iface: WireGuardInterface,
-    ) -> list[IPv4Interface | IPv6Interface]:
-        # 255.255.255.255 as an int
-        netmask_v4 = ipaddress.ip_address((2**32) - 1)
-        netmask_v6 = ipaddress.ip_address((2**128) - 1)
-
-        suggestion_count = 3
-
-        free_ips = []
-
-        server_addresses = iface.iface.interface.get("Address")
-
-        if isinstance(server_addresses, str):
-            server_addresses = [server_addresses]
-
-        for server_address in server_addresses:
-            server_address = ipaddress.ip_interface(server_address)
-
-            server_network = server_address.network
-            possible_ips = list(server_network.hosts())
-
-            possible_ips.remove(server_address.ip)
-
-            for peer in iface.iface.peers.values():
-                allowed_ips = peer.get("AllowedIPs")
-
-                if not allowed_ips:
-                    continue
-
-                if isinstance(allowed_ips, str):
-                    allowed_ips = [allowed_ips]
-
-                for allowed_ip in allowed_ips:
-                    try:
-                        ip = ipaddress.ip_interface(allowed_ip).ip
-                        possible_ips.remove(ip)
-
-                    except ValueError:
-                        continue
-
-            if len(possible_ips) != 0:
-                for ip in possible_ips:
-                    if not (
-                        ip.is_reserved
-                        or ip.is_multicast
-                        or ip.is_link_local
-                        or ip.is_loopback
-                    ):
-                        netmask = netmask_v4
-                        if ip.version == 6:
-                            netmask = netmask_v6
-
-                        new_ip = ipaddress.ip_interface(f"{ip}/{netmask}")
-                        free_ips.append(new_ip)
-
-                        suggestion_count -= 1
-
-                        if suggestion_count <= 0:
-                            break
-
-        return free_ips
-
-    @staticmethod
-    def _get_peer_recommended_allowed_ips(
-        iface: WireGuardInterface,
-    ) -> list[IPv4Network | IPv6Network]:
-        suggested_networks = []
-
-        server_addresses = iface.iface.interface.get("Address")
-
-        if isinstance(server_addresses, str):
-            server_addresses = [server_addresses]
-
-        for server_address in server_addresses:
-            server_address = ipaddress.ip_interface(server_address)
-
-            suggested_networks.append(server_address.network)
-
-        return suggested_networks
