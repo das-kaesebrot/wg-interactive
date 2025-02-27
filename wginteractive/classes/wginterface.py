@@ -43,6 +43,9 @@ class WireGuardInterface:
 
     def is_enabled_on_systemd(self) -> bool | None:
         return Systemd.check_if_wg_interface_is_enabled(self.ifacename)
+    
+    def flip_systemd_status(self):
+        Systemd.flip_wg_interface_enabled_status(self.ifacename)
 
     def get_publickey(self) -> str:
         return wgexec.get_publickey(self.iface.interface.get("PrivateKey"))

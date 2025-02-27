@@ -21,6 +21,11 @@ class Systemd:
     @staticmethod
     def check_if_wg_interface_is_enabled(interface) -> bool | None:
         return Systemd.check_if_unit_is_enabled(f"{Systemd.WG_QUICK_SERVICE}@{interface}")
+    
+    @staticmethod
+    def flip_wg_interface_enabled_status(interface):
+        Systemd.flip_enabled_status(f"{Systemd.WG_QUICK_SERVICE}@{interface}", now=True)
+        
     @staticmethod
     def start_unit(unit: str):
         if not unit.endswith(".service"):

@@ -163,8 +163,8 @@ PresharedKey = {presharedkey}
             pass
         
         elif interface_action == CliHandlerAction.FLIP_SYSTEMD:
-            # Systemd.flip_enabled_status(selectedWGName)
-            pass
+            print(f"Flipping enabled status for '{wginterface.ifacename}'")
+            wginterface.flip_systemd_status()
     
     def _create_new_interface(self) -> WireGuardInterface:
         os.makedirs(name=self.config.wireguard_conf_dir, mode=0o600, exist_ok=True)
