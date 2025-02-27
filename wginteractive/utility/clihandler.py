@@ -296,8 +296,21 @@ PresharedKey = {presharedkey}
         server_pubkey = iface.get_publickey()
         
         iface.add_peer_to_interface(peer)
-                
-        disclaimer = "GENERATED PEER CONFIG, PRIVATE KEY WON'T BE SHOWN AGAIN"
+        
+        self._print_with_disclaimer(disclaimer="GENERATED PEER CONFIG, PRIVATE KEY WON'T BE SHOWN AGAIN", text=self._format_peer(peer, server_pubkey, clientside_endpoint, clientside_persistentkeepalive))
+        
+        
+    def _get_existing_peer_interactively(self, iface: WireGuardInterface) -> str:
+        self._pretty_print_peers(iface)
+        return self._get_list_entry_interactively([*iface.get_peers_with_name().items()])[0]
+    
+    
+    @staticmethod
+    def _print_with_disclaimer(disclaimer: str, text: str):
+        width = os.get_terminal_size().columns
+                        
+        disclaimer = disclaimer.upper()
+        
         padded_chars = ((width - len(disclaimer)) // 2) - 1
         
         # clip below 0
@@ -307,29 +320,22 @@ PresharedKey = {presharedkey}
         
         if ((width - len(disclaimer)) % 2) == 1:
             padded_chars_right += 1
-            
-        print(padded_chars, padded_chars_right)
         
         print("#" * width)
         print("#" * padded_chars + f" {disclaimer} " + "#" * padded_chars_right)
         print("#" * width, "")
-        self._print_peer(peer, server_pubkey, clientside_endpoint, clientside_persistentkeepalive)
+        print(text)
+        print()
         print("#" * width, "")
-        
-        
-    def _get_existing_peer_interactively(self, iface: WireGuardInterface) -> str:
-        self._pretty_print_peers(iface)
-        return self._get_list_entry_interactively([*iface.get_peers_with_name().items()])[0]
-    
     
     @staticmethod
     def _pretty_print_peer_with_index(index: int, peer_key: str, peer_dict: dict):
         text = CliHandler.TEMPLATE_PRETTY_PRINT_PEER.format(index = index, peer_key = peer_key, allowed_ips = peer_dict.get('AllowedIPs'), name = peer_dict.get('name'))
         
-        print(text)    
+        print(text)
     
     @staticmethod
-    def _print_peer(peer: WgInteractivePeer, server_publickey: str, endpoint: str, persistentkeepalive: bool):
+    def _format_peer(peer: WgInteractivePeer, server_publickey: str, endpoint: str, persistentkeepalive: bool):
         additional_options = ""
         
         if (persistentkeepalive):
@@ -348,7 +354,7 @@ PresharedKey = {presharedkey}
             additional_options = additional_options
         )
         
-        print(text)
+        return text
     
     
     @staticmethod
