@@ -2,8 +2,6 @@ name: Generate release
 
 on:
   push:
-    branches:
-      - main
     tags:
       - '*'
 
@@ -14,8 +12,7 @@ permissions:
   pull-requests: read
 
 jobs:      
-  release:  
-    if: github.ref_type == 'tag'
+  release:
     runs-on: ubuntu-latest    
     steps:
       - name: "Create release"
