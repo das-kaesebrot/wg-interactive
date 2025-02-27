@@ -10,3 +10,4 @@ class CliHandlerAction(StrEnum):
     NEWKEY_SERVER = 'ks' # unused
     DELETE = 'd'
     FLIP_SYSTEMD = 's'
+    GO_UP = '..'

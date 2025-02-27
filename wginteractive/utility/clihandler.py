@@ -38,6 +38,9 @@ class CliHandler:
         CliHandlerAction.FLIP_SYSTEMD: {
             "desc": "Flip enabled state for wg-quick systemd service",
         },
+        CliHandlerAction.GO_UP: {
+            "desc": "Go back to previous menu",
+        },
     }
 
     TEXT_CLIENT_ENDPOINT_PORT = f"""{colored('Endpoint port', attrs=['bold'])}
@@ -113,46 +116,58 @@ PresharedKey = {presharedkey}
     def _refresh_interfaces(self):
         self._wginterfaces = self._wghandler.get_interfaces()
 
-    def handle(self) -> None:
+    def handle(self) -> None:        
+        looping = True
+        
+        while looping:
+            looping = False
+            iface_or_init = self._get_initial_interface_or_action_and_validate()
 
-        iface_or_init = self._get_initial_interface_or_action_and_validate()
+            if iface_or_init.strip().lower() == CliHandlerAction.INIT_NEW_IFACE:
+                if self._create_new_interface():
+                    print("Successfully created new interface!")
+                return
 
-        if iface_or_init.strip().lower() == CliHandlerAction.INIT_NEW_IFACE:
-            if self._create_new_interface():
-                print("Successfully created new interface!")
-            return
+            iface_or_init = int(iface_or_init)
 
-        iface_or_init = int(iface_or_init)
+            wginterface_key = list(self._wginterfaces)[int(iface_or_init)]
+            wginterface = self._wginterfaces.get(wginterface_key)
 
-        wginterface_key = list(self._wginterfaces)[int(iface_or_init)]
-        wginterface = self._wginterfaces.get(wginterface_key)
+            self._print_interface_status(wginterface)
+            
+            done = False
+                    
+            while not done:
+                done = True
+                interface_action = self._get_action_for_interface_and_validate()
 
-        self._print_interface_status(wginterface)
+                if interface_action == CliHandlerAction.ADD:
+                    self._get_new_peer_interactively(wginterface)
 
-        interface_action = self._get_action_for_interface_and_validate()
+                elif interface_action == CliHandlerAction.LIST:
+                    self._pretty_print_peers(wginterface)
+                    done = False
 
-        if interface_action == CliHandlerAction.ADD:
-            self._get_new_peer_interactively(wginterface)
+                elif interface_action == CliHandlerAction.RENAME:
+                    self._rename_peer_interactively(wginterface)
 
-        elif interface_action == CliHandlerAction.LIST:
-            self._pretty_print_peers(wginterface)
+                elif interface_action == CliHandlerAction.NEWKEY_CLIENT:
+                    self._regenerate_keypair_interactively(wginterface)
 
-        elif interface_action == CliHandlerAction.RENAME:
-            self._rename_peer_interactively(wginterface)
+                elif interface_action == CliHandlerAction.NEWPSK:
+                    self._regenerate_psk_interactively(wginterface)
 
-        elif interface_action == CliHandlerAction.NEWKEY_CLIENT:
-            self._regenerate_keypair_interactively(wginterface)
+                elif interface_action == CliHandlerAction.DELETE:
+                    self._delete_peer_interactively(wginterface)
 
-        elif interface_action == CliHandlerAction.NEWPSK:
-            self._regenerate_psk_interactively(wginterface)
-
-        elif interface_action == CliHandlerAction.DELETE:
-            self._delete_peer_interactively(wginterface)
-
-        # unreachable if systemd is disabled
-        elif interface_action == CliHandlerAction.FLIP_SYSTEMD:
-            print(f"Flipping enabled status for '{wginterface.ifacename}'")
-            wginterface.flip_systemd_status()
+                # unreachable if systemd is disabled
+                elif interface_action == CliHandlerAction.FLIP_SYSTEMD:
+                    print(f"Flipping enabled status for '{wginterface.ifacename}'")
+                    wginterface.flip_systemd_status()
+                    
+                elif interface_action == CliHandlerAction.GO_UP:
+                    done = True
+                    looping = True
 
     def _create_new_interface(self) -> WireGuardInterface:
         os.makedirs(name=self.config.wireguard_conf_dir, mode=0o600, exist_ok=True)
@@ -206,7 +221,7 @@ PresharedKey = {presharedkey}
 
         while True:
             for k, v in self.ACTIONS_MENU_ROOT.items():
-                print("[%c] %s" % (k, v.get("desc")))
+                print("[%s] %s" % (k, v.get("desc")))
 
             selection = input(CliHandler.PROMPT)
 
@@ -240,7 +255,7 @@ PresharedKey = {presharedkey}
 
         while True:
             for k, v in self.ACTIONS_MENU.items():
-                print("[%c] %s" % (k, v.get("desc")))
+                print("[%s] %s" % (k, v.get("desc")))
 
             selection = input(CliHandler.PROMPT)
 
