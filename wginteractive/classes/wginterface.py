@@ -134,7 +134,7 @@ class WireGuardInterface:
         return privatekey
         
     
-    def regenerate_presharedey(self, peer_key: str) -> str:
+    def regenerate_presharedkey(self, peer_key: str) -> str:
         presharedkey = wgexec.generate_presharedkey()
         
         self._replace_peer_presharedkey(peer_key=peer_key, new_presharedkey=presharedkey)
