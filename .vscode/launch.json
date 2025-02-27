@@ -11,9 +11,9 @@
             "module": "wginteractive",
             "justMyCode": true,
             "sudo": true,
-            "env": {
-                "WGCONFPATH": "/home/julian/git/personal/wg-interactive/test/conf"
-            }
+            "args": [
+                "--directory", "test/conf"
+            ]
         }
     ]
 }
