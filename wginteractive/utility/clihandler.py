@@ -157,7 +157,7 @@ Please input the peer's name:"""
         ]  # filter out none values
 
         iface_name = self._get_interface_name_and_validate(
-            f"Please enter an intercae name for the new interface:\nIllegal names: {illegal_names}",
+            f"Please enter a name for the new interface:\nIllegal names: {illegal_names}",
             illegal_names=illegal_names,
         )
         print(f"Selected interface name: '{iface_name}'\n")
