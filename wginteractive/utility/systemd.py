@@ -19,8 +19,8 @@ class Systemd:
         pass
 
     @staticmethod
-    def check_if_wg_interface_is_enabled(interface) -> bool | None:
-        return Systemd.check_if_unit_is_enabled(f"{Systemd.WG_QUICK_SERVICE}@{interface}")
+    def wg_interface_is_enabled(interface) -> bool | None:
+        return Systemd.unit_is_enabled(f"{Systemd.WG_QUICK_SERVICE}@{interface}")
     
     @staticmethod
     def flip_wg_interface_enabled_status(interface):
@@ -53,13 +53,13 @@ class Systemd:
             if now: Systemd.start_unit(unit)
     
     @staticmethod
-    def check_if_unit_is_enabled(unit) -> bool:
-        if not Systemd.check_if_host_is_using_systemd():
+    def unit_is_enabled(unit) -> bool:
+        if not Systemd.host_is_using_systemd():
             return None
         return os.path.isfile(os.path.join(Systemd.MULTI_USER_TARGET_WANTS_FOLDER, unit))
     
     @staticmethod
-    def check_if_host_is_using_systemd() -> bool:
+    def host_is_using_systemd() -> bool:
         return os.path.exists("/run/systemd/system")
     
     @staticmethod

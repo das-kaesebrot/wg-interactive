@@ -119,7 +119,7 @@ PresharedKey = {presharedkey}
             self.ACTIONS_MENU_ROOT[str(counter)] = { 'desc' :iface }
             counter += 1
 
-        self.USE_SYSTEMD = Systemd.check_if_host_is_using_systemd()
+        self.USE_SYSTEMD = Systemd.host_is_using_systemd()
 
         if not self.USE_SYSTEMD:
             self.ACTIONS_MENU.pop(CliHandlerAction.FLIP_SYSTEMD)
