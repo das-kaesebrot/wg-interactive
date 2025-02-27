@@ -52,7 +52,7 @@ class WireGuardInterface:
         Systemd.flip_wg_interface_enabled_status(self.ifacename)
 
     def get_publickey(self) -> str:
-        return wgexec.get_publickey(self.iface.interface.get("PrivateKey"))
+        return self._publickey
 
     def get_server_ip_interface(self) -> IPv4Interface | IPv6Interface:
         return ip_interface(self.iface.interface.get("Address"))
