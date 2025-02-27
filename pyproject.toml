@@ -24,7 +24,7 @@ classifiers = [
 
 dependencies=[
   "wgconfig==0.3.0",
-  "termcolor==2.4.0",
+  "termcolor==2.5.0",
   "netifaces2==0.0.22",
 ]
 
