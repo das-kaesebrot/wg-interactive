@@ -158,8 +158,10 @@ PresharedKey = {presharedkey}
             self._rename_peer_interactively(wginterface)
             
         elif interface_action == CliHandlerAction.NEWKEY_CLIENT:
-            # regeneratePeerPublicKey(wc, selectedWGName, absWGPath)
-            pass
+            self._regenerate_keypair_interactively(wginterface)
+        
+        elif interface_action == CliHandlerAction.NEWPSK:
+            self._regenerate_psk_interactively(wginterface)
         
         elif interface_action == CliHandlerAction.DELETE:
             self._delete_peer_interactively(wginterface)
@@ -257,7 +259,19 @@ PresharedKey = {presharedkey}
     def _delete_peer_interactively(self, iface: WireGuardInterface):
         peer_key = self._get_existing_peer_interactively(iface)
         iface.delete_peer(peer_key)
+        
     
+    def _regenerate_keypair_interactively(self, iface: WireGuardInterface):
+        peer_key = self._get_existing_peer_interactively(iface)
+        peer_privatekey = iface.regenerate_peer_keypair(peer_key)
+        
+        self._print_with_disclaimer(disclaimer="NEW PRIVATE KEY, VALUE WON'T BE SHOWN AGAIN", text=peer_privatekey)
+    
+    def _regenerate_psk_interactively(self, iface: WireGuardInterface):
+        peer_key = self._get_existing_peer_interactively(iface)
+        presharedkey = iface.regenerate_presharedkey(peer_key)
+        
+        self._print_with_disclaimer(disclaimer="NEW PRESHARED KEY", text=presharedkey)
         
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
         clientside_endpoint_port = self._get_endpoint_port_interactively(self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get('ListenPort')))
