@@ -40,3 +40,21 @@ Then build the package:
 pipenv shell
 python -m build
 ```
+
+## License Attribution
+
+This application uses Open Source components. You can find the source code of their open source projects along with license information below. We acknowledge and are grateful to these developers for their contributions to open source.
+
+[WireGuard](https://www.wireguard.com/) is a registered trademark of Jason A. Donenfeld.
+
+### [wgconfig](https://github.com/towalink/wgconfig)
+- Copyright (c) 2020-2025 [Dirk Henrici](https://github.com/towalink).
+- [AGPL3 license](https://opensource.org/licenses/AGPL-3.0)
+
+### [termcolor](https://github.com/termcolor/termcolor)
+- Copyright (c) 2008-2011 Volvox Development Team.
+- [MIT license](https://github.com/termcolor/termcolor/blob/main/COPYING.txt)
+
+### [netifaces-2](https://github.com/SamuelYvon/netifaces-2)
+- Copyright (c) 2022 Samuel Yvon.
+- [MIT license](https://github.com/SamuelYvon/netifaces-2/blob/dev/LICENSE)
