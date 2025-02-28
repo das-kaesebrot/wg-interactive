@@ -1,6 +1,7 @@
 # wg-interactive
-`wg-interactive` is a command line tool for initializing WireGuard server configuration files as well as adding and deleting peers interactively.
+[![Upload Python Package](https://github.com/das-kaesebrot/wg-interactive/actions/workflows/python-publish.yml/badge.svg)](https://github.com/das-kaesebrot/wg-interactive/actions/workflows/python-publish.yml)
 
+`wg-interactive` is a command line tool for initializing WireGuard server configuration files as well as adding and deleting peers interactively.
 
 ## Installation
 
