@@ -5,7 +5,7 @@ from termcolor import colored
 import argparse
 from sys import version_info
 
-from ._version import __version__
+from . import __version__
 from .utility.clihandler import CliHandler
 
 def main():
