@@ -48,8 +48,7 @@ class WireGuardInterface:
         if (
             self._invoke_wg_command_on_iface(
                 self.CMD_WG_SHOW, capture_output=True
-            )
-            == 0
+            ).returncode == 0
         ):
             return True
         return False
