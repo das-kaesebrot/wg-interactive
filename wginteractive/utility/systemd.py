@@ -55,13 +55,9 @@ class Systemd:
             unit = f"{unit}.service"
 
         if os.path.isfile(os.path.join(Systemd.MULTI_USER_TARGET_WANTS_FOLDER, unit)):
-            Systemd.invoke_systemd_command_on_unit(Systemd.CMD_DISABLE, unit)
-            if now:
-                Systemd.stop_unit(unit)
+            Systemd.invoke_systemd_command_on_unit(f"{Systemd.CMD_DISABLE}{' --now' if now else ''}", unit)
         else:
-            Systemd.invoke_systemd_command_on_unit(Systemd.CMD_ENABLE, unit)
-            if now:
-                Systemd.start_unit(unit)
+            Systemd.invoke_systemd_command_on_unit(f"{Systemd.CMD_ENABLE}{' --now' if now else ''}", unit)
 
     @staticmethod
     def unit_is_enabled(unit) -> bool:
