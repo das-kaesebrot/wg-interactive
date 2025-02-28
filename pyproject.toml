@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "wg-interactive"
 dynamic = ["version"]
+license = "AGPL-3.0-or-later"
 
 authors = [
     { name="Julian", email="mail@kaesebrot.eu" }
@@ -20,6 +21,8 @@ classifiers = [
     "Development Status :: 4 - Beta",
 
     "Intended Audience :: System Administrators",
+
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
 ]
 
 dependencies=[
