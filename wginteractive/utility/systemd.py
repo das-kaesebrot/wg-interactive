@@ -21,7 +21,7 @@ class Systemd:
 
     @staticmethod
     def wg_interface_is_enabled(interface) -> bool | None:
-        return Systemd.unit_is_enabled(f"{Systemd.WG_QUICK_SERVICE}@{interface}")
+        return Systemd.unit_is_enabled(f"{Systemd.WG_QUICK_SERVICE}@{interface}.service")
 
     @staticmethod
     def flip_wg_interface_enabled_status(interface):
