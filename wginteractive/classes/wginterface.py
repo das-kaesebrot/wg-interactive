@@ -47,7 +47,7 @@ class WireGuardInterface:
     def is_running(self) -> bool:
         if (
             self._invoke_wg_command_on_iface(
-                self.CMD_WG_SHOW, filename=self.iface_conf_path, capture_output=True
+                self.CMD_WG_SHOW, capture_output=True
             )
             == 0
         ):
