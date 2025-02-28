@@ -13,6 +13,8 @@ class Systemd:
 
     CMD_START = "start"
     CMD_STOP = "stop"
+    
+    CMD_IS_ENABLED = "is-enabled"
 
     WG_QUICK_SERVICE = "wg-quick"
 
@@ -63,9 +65,8 @@ class Systemd:
     def unit_is_enabled(unit) -> bool:
         if not Systemd.host_is_using_systemd():
             return None
-        return os.path.isfile(
-            os.path.join(Systemd.MULTI_USER_TARGET_WANTS_FOLDER, unit)
-        )
+        
+        return Systemd.invoke_systemd_command_on_unit(Systemd.CMD_IS_ENABLED, unit=unit, capture_output=True).returncode == 0
 
     @staticmethod
     def host_is_using_systemd() -> bool:
@@ -73,6 +74,6 @@ class Systemd:
 
     @staticmethod
     def invoke_systemd_command_on_unit(
-        command: str, unit: str
+        command: str, unit: str, silent: bool = False, capture_output: bool = False
     ) -> subprocess.CompletedProcess:
-        return SubprocessHandler.invoke_command(f"systemctl {command} {unit}")
+        return SubprocessHandler.invoke_command(f"systemctl {command} {unit}", silent=silent, capture_output=capture_output)
