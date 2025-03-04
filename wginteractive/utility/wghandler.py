@@ -15,7 +15,7 @@ class WireGuardHandler:
 
     def refresh_interfaces(self) -> dict[str, WireGuardInterface]:
         self.interfaces = {}
-        
+
         _ = []
         extension = f".{self.WIREGUARD_CONFIG_EXTENSION}"
 

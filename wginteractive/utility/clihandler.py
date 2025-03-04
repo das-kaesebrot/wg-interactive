@@ -17,19 +17,33 @@ class CliHandler:
     USE_SYSTEMD: bool = False
 
     ACTIONS_MENU_ROOT = {
-        CliHandlerAction.get_str_mapping(CliHandlerAction.INIT_NEW_IFACE): "Initialize a new interface",
+        CliHandlerAction.get_str_mapping(
+            CliHandlerAction.INIT_NEW_IFACE
+        ): "Initialize a new interface",
     }
 
     ACTIONS_MENU = {
         CliHandlerAction.get_str_mapping(CliHandlerAction.ADD): "Add peer",
-        CliHandlerAction.get_str_mapping(CliHandlerAction.LIST): "List all peers and return to this menu",
+        CliHandlerAction.get_str_mapping(
+            CliHandlerAction.LIST
+        ): "List all peers and return to this menu",
         CliHandlerAction.get_str_mapping(CliHandlerAction.RENAME): "Rename peer",
-        CliHandlerAction.get_str_mapping(CliHandlerAction.NEWKEY_CLIENT): "Generate new keypair for peer",
-        CliHandlerAction.get_str_mapping(CliHandlerAction.NEWPSK): "Generate new preshared key between peer and server",
+        CliHandlerAction.get_str_mapping(
+            CliHandlerAction.NEWKEY_CLIENT
+        ): "Generate new keypair for peer",
+        CliHandlerAction.get_str_mapping(
+            CliHandlerAction.NEWPSK
+        ): "Generate new preshared key between peer and server",
         CliHandlerAction.get_str_mapping(CliHandlerAction.DELETE): "Delete peer",
-        CliHandlerAction.get_str_mapping(CliHandlerAction.FLIP_SYSTEMD): "Flip enabled state for wg-quick systemd service",
-        CliHandlerAction.get_str_mapping(CliHandlerAction.DELETE_IFACE): "Delete WireGuard server",
-        CliHandlerAction.get_str_mapping(CliHandlerAction.GO_UP): "Go back to previous menu",
+        CliHandlerAction.get_str_mapping(
+            CliHandlerAction.FLIP_SYSTEMD
+        ): "Flip enabled state for wg-quick systemd service",
+        CliHandlerAction.get_str_mapping(
+            CliHandlerAction.DELETE_IFACE
+        ): "Delete WireGuard server",
+        CliHandlerAction.get_str_mapping(
+            CliHandlerAction.GO_UP
+        ): "Go back to previous menu",
     }
 
     TEXT_CLIENT_ENDPOINT_PORT = f"""{colored('Endpoint port', attrs=['bold'])}
@@ -80,15 +94,21 @@ Please input the peer's name:"""
         self.USE_SYSTEMD = Systemd.host_is_using_systemd()
 
         if not self.USE_SYSTEMD:
-            self.ACTIONS_MENU.pop(CliHandlerAction.get_str_mapping(CliHandlerAction.FLIP_SYSTEMD))
+            self.ACTIONS_MENU.pop(
+                CliHandlerAction.get_str_mapping(CliHandlerAction.FLIP_SYSTEMD)
+            )
 
     def _refresh_interfaces(self):
         self._wginterfaces = self._wghandler.refresh_interfaces()
 
-        init = self.ACTIONS_MENU_ROOT.pop(CliHandlerAction.get_str_mapping(CliHandlerAction.INIT_NEW_IFACE))
+        init = self.ACTIONS_MENU_ROOT.pop(
+            CliHandlerAction.get_str_mapping(CliHandlerAction.INIT_NEW_IFACE)
+        )
 
         self.ACTIONS_MENU_ROOT = {}
-        self.ACTIONS_MENU_ROOT[CliHandlerAction.get_str_mapping(CliHandlerAction.INIT_NEW_IFACE)] = init
+        self.ACTIONS_MENU_ROOT[
+            CliHandlerAction.get_str_mapping(CliHandlerAction.INIT_NEW_IFACE)
+        ] = init
 
         counter = 0
         for iface in self._wginterfaces.keys():
@@ -101,7 +121,10 @@ Please input the peer's name:"""
             self._refresh_interfaces()
             iface_or_init = self._get_initial_interface_or_action_and_validate()
 
-            if isinstance(iface_or_init, CliHandlerAction) and iface_or_init == CliHandlerAction.INIT_NEW_IFACE:
+            if (
+                isinstance(iface_or_init, CliHandlerAction)
+                and iface_or_init == CliHandlerAction.INIT_NEW_IFACE
+            ):
                 if self._create_new_interface():
                     print("Successfully created new interface!")
                 return
@@ -210,11 +233,11 @@ Please input the peer's name:"""
                 print(
                     f"Selected operation/interface: {self.ACTIONS_MENU_ROOT.get(selection)}\n"
                 )
-                
+
                 enum_value = CliHandlerAction.get_enum_from_str(selection)
                 if enum_value:
                     return enum_value
-                
+
                 return selection
 
             print("Invalid input, please try again\n")
@@ -247,11 +270,11 @@ Please input the peer's name:"""
 
             if selection in self.ACTIONS_MENU.keys():
                 print(f"Selected operation: {self.ACTIONS_MENU.get(selection)}\n")
-                
+
                 enum_value = CliHandlerAction.get_enum_from_str(selection)
                 if enum_value:
                     return enum_value
-                
+
                 return selection
 
             print("Invalid input, please try again\n")
@@ -344,7 +367,10 @@ Please input the peer's name:"""
         )
 
         peer = WgInteractivePeer(
-            server_allowed_ips=serverside_allowedips, client_allowed_ips=clientside_allowedips, primary_ip=client_ip, name=serverside_peername
+            server_allowed_ips=serverside_allowedips,
+            client_allowed_ips=clientside_allowedips,
+            primary_ip=client_ip,
+            name=serverside_peername,
         )
 
         server_pubkey = iface.get_publickey()

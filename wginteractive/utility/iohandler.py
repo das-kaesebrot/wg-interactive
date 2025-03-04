@@ -345,9 +345,7 @@ PresharedKey = {presharedkey}
             print("[%i] %s" % (index, value))
 
     @staticmethod
-    def print_interface_status(
-        iface: WireGuardInterface, systemd_active: bool
-    ) -> None:
+    def print_interface_status(iface: WireGuardInterface, systemd_active: bool) -> None:
         if iface.is_running():
             print(
                 f"{colored(iface.ifacename, attrs=['bold'])} is {colored('active', color='green')}. Auto reload after changes enabled."

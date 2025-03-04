@@ -49,7 +49,8 @@ class WireGuardInterface:
         if (
             self._invoke_wg_command_on_iface(
                 self.CMD_WG_SHOW, capture_output=True
-            ).returncode == 0
+            ).returncode
+            == 0
         ):
             return True
         return False
@@ -59,7 +60,7 @@ class WireGuardInterface:
 
     def flip_systemd_status(self):
         Systemd.flip_wg_interface_enabled_status(self.ifacename)
-        
+
     def disable_systemd_status(self):
         Systemd.disable_wg_interface(self.ifacename, now=True)
 

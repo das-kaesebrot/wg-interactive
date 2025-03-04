@@ -8,6 +8,7 @@ from sys import version_info
 from . import __version__
 from .utility.clihandler import CliHandler
 
+
 def main():
     # set up logging config via argparse
     # custom behaviour for python versions < 3.11 as the level names mapping func was only added to the logging lib in 3.11
@@ -43,9 +44,9 @@ def main():
         required=False,
         default="/etc/wireguard",
     )
-    
+
     args = parser.parse_args()
-    
+
     logging.basicConfig(
         format="[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s",
         level=args.loglevel.upper(),
