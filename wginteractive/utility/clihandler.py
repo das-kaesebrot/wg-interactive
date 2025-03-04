@@ -344,7 +344,7 @@ Please input the peer's name:"""
         )
 
         peer = WgInteractivePeer(
-            serverside_allowedips, clientside_allowedips, client_ip, serverside_peername
+            server_allowed_ips=serverside_allowedips, client_allowed_ips=clientside_allowedips, primary_ip=client_ip, name=serverside_peername
         )
 
         server_pubkey = iface.get_publickey()
