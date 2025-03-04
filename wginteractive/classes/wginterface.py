@@ -5,6 +5,7 @@ from wgconfig import wgexec
 import os
 from subprocess import CompletedProcess
 import logging
+from typing import Union, Optional
 
 from .wgpeer import WgInteractivePeer
 from ..utility.systemd import Systemd
@@ -53,7 +54,7 @@ class WireGuardInterface:
             return True
         return False
 
-    def is_enabled_on_systemd(self) -> bool | None:
+    def is_enabled_on_systemd(self) -> Optional[bool]:
         return Systemd.wg_interface_is_enabled(self.ifacename)
 
     def flip_systemd_status(self):
@@ -65,10 +66,10 @@ class WireGuardInterface:
     def get_publickey(self) -> str:
         return self._publickey
 
-    def get_server_ip_interface(self) -> IPv4Interface | IPv6Interface:
+    def get_server_ip_interface(self) -> Union[IPv4Interface, IPv6Interface]:
         return ip_interface(self.iface.interface.get(self.ATTR_ADDRESS))
 
-    def get_listen_port(self) -> int | None:
+    def get_listen_port(self) -> Optional[int]:
         listenport_str = self.iface.interface.get(self.ATTR_LISTENPORT)
 
         if listenport_str:
@@ -196,7 +197,7 @@ class WireGuardInterface:
         *,
         wireguard_basepath: str,
         ifacename: str,
-        address: IPv4Interface | IPv6Interface,
+        address: Union[IPv4Interface, IPv6Interface],
         listen_port: int,
     ):
         iface_conf_path = os.path.join(wireguard_basepath, ifacename + ".conf")

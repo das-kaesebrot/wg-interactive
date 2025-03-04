@@ -3,6 +3,7 @@ import logging
 import os
 
 from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
+from typing import Union
 from termcolor import colored
 from ..classes.wginterface import WireGuardInterface
 from .systemd import Systemd
@@ -189,8 +190,8 @@ PresharedKey = {presharedkey}
 
     @staticmethod
     def get_ip_interface_interactively(
-        text: str, illegal_interfaces: list[(IPv4Interface | IPv6Interface)]
-    ) -> IPv4Interface | IPv6Interface:
+        text: str, illegal_interfaces: list[Union[IPv4Interface, IPv6Interface]]
+    ) -> Union[IPv4Interface, IPv6Interface]:
         print(text)
 
         while True:
@@ -215,8 +216,8 @@ PresharedKey = {presharedkey}
 
     @staticmethod
     def get_ip_interfaces_interactively(
-        text: str, suggested_defaults: list[IPv4Interface | IPv6Interface]
-    ) -> list[(IPv4Interface | IPv6Interface)]:
+        text: str, suggested_defaults: list[Union[IPv4Interface, IPv6Interface]]
+    ) -> list[Union[IPv4Interface, IPv6Interface]]:
         print(text)
 
         while True:
@@ -255,8 +256,8 @@ PresharedKey = {presharedkey}
 
     @staticmethod
     def get_ip_networks_interactively(
-        text: str, suggested_defaults: list[IPv4Network | IPv6Network]
-    ) -> list[(IPv4Network | IPv6Network)]:
+        text: str, suggested_defaults: list[Union[IPv4Interface, IPv6Interface]]
+    ) -> list[Union[IPv4Interface, IPv6Interface]]:
         print(text)
 
         while True:
@@ -371,7 +372,7 @@ PresharedKey = {presharedkey}
     @staticmethod
     def get_next_free_ips(
         iface: WireGuardInterface,
-    ) -> list[IPv4Interface | IPv6Interface]:
+    ) -> list[Union[IPv4Interface, IPv6Interface]]:
         # 255.255.255.255 as an int
         netmask_v4 = ipaddress.ip_address((2**32) - 1)
         netmask_v6 = ipaddress.ip_address((2**128) - 1)
@@ -435,7 +436,7 @@ PresharedKey = {presharedkey}
     @staticmethod
     def get_peer_recommended_allowed_ips(
         iface: WireGuardInterface,
-    ) -> list[IPv4Network | IPv6Network]:
+    ) -> list[Union[IPv4Interface, IPv6Interface]]:
         suggested_networks = []
 
         server_addresses = iface.iface.interface.get("Address")

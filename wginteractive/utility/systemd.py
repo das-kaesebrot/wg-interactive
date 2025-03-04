@@ -1,5 +1,6 @@
 import os
 import subprocess
+from typing import Optional
 
 from ..utility.subprocesshandler import SubprocessHandler
 
@@ -22,7 +23,7 @@ class Systemd:
         pass
 
     @staticmethod
-    def wg_interface_is_enabled(interface) -> bool | None:
+    def wg_interface_is_enabled(interface) -> Optional[bool]:
         return Systemd.unit_is_enabled(f"{Systemd.WG_QUICK_SERVICE}@{interface}")
 
     @staticmethod

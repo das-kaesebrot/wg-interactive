@@ -1,4 +1,5 @@
 import ipaddress
+from typing import Optional
 import netifaces
 import os
 
@@ -11,7 +12,7 @@ class ServerInfo:
         pass
 
     @staticmethod
-    def get_hostname() -> str | None:
+    def get_hostname() -> Optional[str]:
         hostname = os.uname().nodename
 
         # Assume that if the nodename contains a dot, it probably is a fully qualified hostname
@@ -21,7 +22,7 @@ class ServerInfo:
         return None
 
     @staticmethod
-    def get_public_ipv4() -> IPv4Address | None:
+    def get_public_ipv4() -> Optional[IPv4Address]:
         for iface in netifaces.interfaces():
             ifaddresses = netifaces.ifaddresses(iface)
             if netifaces.AF_INET in ifaddresses.keys():
@@ -40,7 +41,7 @@ class ServerInfo:
         return None
 
     @staticmethod
-    def get_public_ipv6() -> IPv6Address | None:
+    def get_public_ipv6() -> Optional[IPv6Address]:
         for iface in netifaces.interfaces():
             ifaddresses = netifaces.ifaddresses(iface)
             if netifaces.AF_INET6 in ifaddresses.keys():

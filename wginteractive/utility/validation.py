@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 
 class Validation:
@@ -14,27 +15,27 @@ class Validation:
         pass
 
     @staticmethod
-    def validate_port(string: str) -> str | None:
+    def validate_port(string: str) -> Optional[str]:
         return re.match(Validation.PORTPATTERN, string)
 
     @staticmethod
-    def validate_domain(string: str) -> str | None:
+    def validate_domain(string: str) -> Optional[str]:
         return re.match(Validation.DOMAINPATTERN, string)
 
     @staticmethod
-    def validate_ipv4(string: str) -> str | None:
+    def validate_ipv4(string: str) -> Optional[str]:
         return re.match(Validation.IPV4PATTERN, string)
 
     @staticmethod
-    def validate_ipv6(string: str) -> str | None:
+    def validate_ipv6(string: str) -> Optional[str]:
         return re.match(Validation.IPV6PATTERN, string)
 
     @staticmethod
-    def validate_ip(string: str) -> str | None:
+    def validate_ip(string: str) -> Optional[str]:
         return re.match(f"{Validation.IPV4PATTERN}|{Validation.IPV6PATTERN}", string)
 
     @staticmethod
-    def validate_host(string: str) -> str | None:
+    def validate_host(string: str) -> Optional[str]:
         return re.match(
             f"{Validation.IPV4PATTERN}|{Validation.IPV6PATTERN}|{Validation.DOMAINPATTERN}",
             string,

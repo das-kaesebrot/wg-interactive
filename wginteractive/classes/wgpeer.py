@@ -1,4 +1,5 @@
 from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
+from typing import Union
 from wgconfig import wgexec
 import ipaddress
 import logging
@@ -8,9 +9,9 @@ class WgInteractivePeer:
     """Class that represents a single wireguard peer (from the server's point of view)"""
 
     name: str = "Unnamed Peer"
-    server_allowed_ips: list[(IPv4Interface | IPv6Interface)] = []
-    client_allowed_ips: list[(IPv4Network | IPv6Network)] = []
-    primary_ip: IPv4Interface | IPv6Interface = None
+    server_allowed_ips: list[Union[IPv4Interface, IPv6Interface, None]] = []
+    client_allowed_ips: list[Union[IPv4Interface, IPv6Interface, None]] = []
+    primary_ip: Union[IPv4Interface, IPv6Interface, None] = None
     private_key: str = None
     public_key: str = None
     preshared_key: str = None
@@ -19,9 +20,9 @@ class WgInteractivePeer:
 
     def __init__(
         self,
-        server_allowed_ips: list[(IPv4Interface | IPv6Interface)],
-        client_allowed_ips: list[(IPv4Network | IPv6Network)],
-        primary_ip: IPv4Interface | IPv6Interface = None,
+        server_allowed_ips: list[Union[IPv4Interface, IPv6Interface, None]],
+        client_allowed_ips: list[Union[IPv4Interface, IPv6Interface, None]],
+        primary_ip: Union[IPv4Interface, IPv6Interface, None] = None,
         name: str = None,
     ) -> None:
         if name:
