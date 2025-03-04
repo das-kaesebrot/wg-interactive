@@ -89,7 +89,7 @@ class WireGuardInterface:
 
     def add_peer_to_interface(self, peer: WgInteractivePeer):
         allowedips_str = ",".join(
-            map(lambda iface: iface.compressed, peer.client_allowed_ips)
+            map(lambda iface: iface.compressed, peer.server_allowed_ips)
         )
 
         self.iface.add_peer(peer.public_key, f"# {peer.name}")
