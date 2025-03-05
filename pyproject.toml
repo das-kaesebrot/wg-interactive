@@ -27,7 +27,7 @@ classifiers = [
 ]
 
 dependencies=[
-  "wgconfig==0.3.0",
+  "wgconfig==1.1.0",
   "netifaces2==0.0.22",
 ]
 
