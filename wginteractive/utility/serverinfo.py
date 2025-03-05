@@ -15,11 +15,7 @@ class ServerInfo:
     def get_hostname() -> Optional[str]:
         hostname = os.uname().nodename
 
-        # Assume that if the nodename contains a dot, it probably is a fully qualified hostname
-        if "." in hostname:
-            return hostname
-
-        return None
+        return hostname
 
     @staticmethod
     def get_public_ipv4() -> Optional[IPv4Address]:
