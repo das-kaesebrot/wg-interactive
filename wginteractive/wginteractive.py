@@ -75,7 +75,7 @@ An interactive command line tool for modifying and initializing WireGuard server
         logger.exception("Not implemented yet")
         sys.exit(0)
 
-    except EOFError or KeyboardInterrupt:
+    except (EOFError, KeyboardInterrupt):
         print()
         logger.info("Detected keyboard interrupt or EOF. Aborting.")
         sys.exit(0)
