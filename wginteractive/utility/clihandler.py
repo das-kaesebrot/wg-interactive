@@ -3,6 +3,7 @@ import os
 import re
 import logging
 import ipaddress
+import readline
 
 from ..classes.wgpeer import WgInteractivePeer
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
