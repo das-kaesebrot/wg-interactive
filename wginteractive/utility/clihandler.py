@@ -3,13 +3,13 @@ import os
 import re
 import logging
 import ipaddress
-from termcolor import colored
 
 from ..classes.wgpeer import WgInteractivePeer
 from ..utility.wghandler import WireGuardHandler, WireGuardInterface
 from .iohandler import InputOutputHandler
 from ..utility.systemd import Systemd
 from ..utility.serverinfo import ServerInfo
+from ..utility.colorformatting import bold
 from ..enums.clihandler_action import CliHandlerAction
 
 
@@ -46,10 +46,10 @@ class CliHandler:
         ): "Go back to previous menu",
     }
 
-    TEXT_CLIENT_ENDPOINT_PORT = f"""{colored('Endpoint port', attrs=['bold'])}
+    TEXT_CLIENT_ENDPOINT_PORT = f"""{bold('Endpoint port')}
 Please select an endpoint port to use or input your own:"""
 
-    TEXT_CLIENT_ENDPOINT_HOST = f"""{colored('Endpoint host', attrs=['bold'])}
+    TEXT_CLIENT_ENDPOINT_HOST = f"""{bold('Endpoint host')}
 Since it is not required for a WireGuard server to read its own endpoint domain/IP from the config file, this script needs to provide that value.
 Please select an endpoint host (this server's IP or a FQDN pointing to it) to use in the peer's config file or input your own.
 Examples for valid own inputs:
@@ -57,19 +57,19 @@ vpn.example.com
 11.22.33.44
 Please don't append the port, this will be done automatically!"""
 
-    TEXT_SERVER_ALLOWEDIPS = f"""{colored('AllowedIPs (Server config)', attrs=['bold'])}
+    TEXT_SERVER_ALLOWEDIPS = f"""{bold('AllowedIPs (Server config)')}
 Please select a recommended address or give your own (comma-separated for multiple ranges):"""
 
-    TEXT_CLIENT_ADDRESS = f"""{colored('Address (Client config)', attrs=['bold'])}
+    TEXT_CLIENT_ADDRESS = f"""{bold('Address (Client config)')}
 For the peer sided config - defines the primary IP and subnet for the client.
 Please select a recommended address or give your own (comma-separated for multiple ranges):"""
 
-    TEXT_CLIENT_ALLOWEDIPS = f"""{colored('AllowedIPs (Client config)', attrs=['bold'])}
+    TEXT_CLIENT_ALLOWEDIPS = f"""{bold('AllowedIPs (Client config)')}
 For the peer sided config - defines which network ranges the peer is allowed to access.
 Be aware that a user may change this in their config at any time.
 Please select a range of AllowedIPs or give your own (comma-separated for multiple ranges):"""
 
-    TEXT_SERVER_PEER_NAME = f"""{colored('Peer name', attrs=['bold'])}
+    TEXT_SERVER_PEER_NAME = f"""{bold('Peer name')}
 Please input the peer's name:"""
 
     TEXT_RENAME_NEW_NAME = "Please give a new name for the peer:"
@@ -281,7 +281,7 @@ Please input the peer's name:"""
 
     def _pretty_print_peers(self, iface: WireGuardInterface):
         print(
-            f"Peers in WireGuard interface {colored(iface.ifacename, attrs=['bold'])}:"
+            f"Peers in WireGuard interface {bold(iface.ifacename)}:"
         )
 
         peers = iface.get_peers_with_name()
@@ -346,7 +346,7 @@ Please input the peer's name:"""
 
         clientside_endpoint = f"{clientside_endpoint_host}:{clientside_endpoint_port}"
 
-        print(f"Selected endpoint: {colored(clientside_endpoint, attrs=['bold'])}\n")
+        print(f"Selected endpoint: {bold(clientside_endpoint)}\n")
 
         serverside_peername = InputOutputHandler.get_str_interactively(
             self.TEXT_SERVER_PEER_NAME

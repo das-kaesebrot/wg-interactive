@@ -4,12 +4,11 @@ import os
 
 from ipaddress import IPv4Interface, IPv6Interface, IPv4Network, IPv6Network
 from typing import Union
-from termcolor import colored
 from ..classes.wginterface import WireGuardInterface
 from .systemd import Systemd
 from .validation import Validation
+from .colorformatting import bold, green, red
 from ..classes.wgpeer import WgInteractivePeer
-
 
 class InputOutputHandler:
 
@@ -348,21 +347,21 @@ PresharedKey = {presharedkey}
     def print_interface_status(iface: WireGuardInterface, systemd_active: bool) -> None:
         if iface.is_running():
             print(
-                f"{colored(iface.ifacename, attrs=['bold'])} is {colored('active', color='green')}. Auto reload after changes enabled."
+                f"{bold(iface.ifacename)} is {green('active')}. Auto reload after changes enabled."
             )
         else:
             print(
-                f"{colored(iface.ifacename, attrs=['bold'])} is {colored('not active', color='red')}. Skipping auto reload after changes are made."
+                f"{bold(iface.ifacename)} is {red('not active')}. Skipping auto reload after changes are made."
             )
 
         if systemd_active:
             if iface.is_enabled_on_systemd():
                 print(
-                    f"Service {colored(f'{Systemd.WG_QUICK_SERVICE}@{iface.ifacename}', attrs=['bold'])} is {colored('enabled', color='green')}"
+                    f"Service {bold(f'{Systemd.WG_QUICK_SERVICE}@{iface.ifacename}')} is {green('enabled')}"
                 )
             else:
                 print(
-                    f"Service {colored(f'{Systemd.WG_QUICK_SERVICE}@{iface.ifacename}', attrs=['bold'])} is {colored('not enabled', color='red')}"
+                    f"Service {bold(f'{Systemd.WG_QUICK_SERVICE}@{iface.ifacename}')} is {red('not enabled')}"
                 )
         else:
             print(f"Seems like host doesn't use systemd, skipping check for service")

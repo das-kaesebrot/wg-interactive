@@ -1,12 +1,12 @@
 import sys
 import os
 import logging
-from termcolor import colored
 import argparse
 from sys import version_info
 
 from . import __version__
 from .utility.clihandler import CliHandler
+from .utility.colorformatting import bold
 
 
 def main():
@@ -61,7 +61,7 @@ def main():
 
         versionstr = __version__
 
-        banner = f"""{colored(f'wg-interactive v{versionstr}', attrs=['bold'])}
+        banner = f"""{bold(f'wg-interactive v{versionstr}')}
 
 An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers.
 """
