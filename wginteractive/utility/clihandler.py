@@ -9,7 +9,7 @@ from ..utility.wghandler import WireGuardHandler, WireGuardInterface
 from .iohandler import InputOutputHandler
 from ..utility.systemd import Systemd
 from ..utility.serverinfo import ServerInfo
-from ..utility.colorformatting import bold
+from ..utility.colorformatting import bold, green, red
 from ..enums.clihandler_action import CliHandlerAction
 
 
@@ -97,6 +97,8 @@ Please input the peer's name:"""
             self.ACTIONS_MENU.pop(
                 CliHandlerAction.get_str_mapping(CliHandlerAction.FLIP_SYSTEMD)
             )
+        
+        print(f"Host {bold(ServerInfo.get_hostname())} is {green('using systemd' if self.USE_SYSTEMD else red('not using systemd'))}")
 
     def _refresh_interfaces(self):
         self._wginterfaces = self._wghandler.refresh_interfaces()
