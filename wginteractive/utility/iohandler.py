@@ -134,7 +134,10 @@ PresharedKey = {presharedkey}
         port_max = (2**16) - 1
 
         while True:
-            InputOutputHandler.print_list_of_options([suggested_default])
+            if suggested_default != 0:
+                InputOutputHandler.print_list_of_options([suggested_default])
+            else:
+                logging.getLogger(__name__).warning("Server has no listen port!")
 
             selection = input(InputOutputHandler.PROMPT)
 

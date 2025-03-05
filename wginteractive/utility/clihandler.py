@@ -330,7 +330,7 @@ Please input the peer's name:"""
 
     def _get_new_peer_interactively(self, iface: WireGuardInterface):
         clientside_endpoint_port = InputOutputHandler.get_endpoint_port_interactively(
-            self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get("ListenPort"))
+            self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get("ListenPort", 0))
         )
         clientside_endpoint_host = InputOutputHandler.get_endpoint_host_interactively(
             self.TEXT_CLIENT_ENDPOINT_HOST, ServerInfo._get_recommended_endpoint_hosts()
