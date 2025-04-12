@@ -146,7 +146,7 @@ Please input the peer's name:"""
                 interface_action = self._get_action_for_interface_and_validate()
 
                 if interface_action == CliHandlerAction.ADD:
-                    self._get_new_peer_interactively(wginterface)
+                    self._add_new_peer_interactively(wginterface)
 
                 elif interface_action == CliHandlerAction.LIST:
                     self._pretty_print_peers(wginterface)
@@ -331,7 +331,7 @@ Please input the peer's name:"""
             disclaimer="NEW PRESHARED KEY", text=presharedkey
         )
 
-    def _get_new_peer_interactively(self, iface: WireGuardInterface):
+    def _add_new_peer_interactively(self, iface: WireGuardInterface):
         clientside_endpoint_port = InputOutputHandler.get_endpoint_port_interactively(
             self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get("ListenPort", 0))
         )
