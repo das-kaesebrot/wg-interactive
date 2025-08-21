@@ -17,7 +17,7 @@ class WireGuardInterface:
     ifacename = ""
 
     CMD_WG_SHOW = "show"
-    CMD_WG_STRIP = "strip"
+    CMD_WG_QUICK_STRIP = "strip"
     CMD_WG_SETCONF = (
         "setconf"  # requires an additional filename argument or piping into the command
     )
@@ -81,8 +81,8 @@ class WireGuardInterface:
     def reload_if_interface_is_running(self):
         if self.is_running():
             with tempfile.NamedTemporaryFile(mode="w+") as tf:
-                result = self._invoke_wg_command_on_iface(
-                    self.CMD_WG_STRIP, capture_output=True
+                result = self._invoke_wg_quick_command_on_iface(
+                    self.CMD_WG_QUICK_STRIP, capture_output=True
                 )
                 tf.write(result.stdout.decode("utf-8"))
                 tf.seek(0)
@@ -189,6 +189,19 @@ class WireGuardInterface:
     ) -> CompletedProcess:
         return SubprocessHandler.invoke_command(
             f"wg {command} {self.ifacename}{' ' + filename if filename else ''}",
+            silent,
+            capture_output,
+        )
+
+    def _invoke_wg_quick_command_on_iface(
+        self,
+        command: str,
+        filename: str = None,
+        silent: bool = False,
+        capture_output: bool = False,
+    ) -> CompletedProcess:
+        return SubprocessHandler.invoke_command(
+            f"wg-quick {command} {filename if filename else self.ifacename}",
             silent,
             capture_output,
         )
