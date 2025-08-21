@@ -84,6 +84,7 @@ class WireGuardInterface:
                 result = self._invoke_wg_quick_command_on_iface(
                     self.CMD_WG_QUICK_STRIP, capture_output=True
                 )
+                result.check_returncode()
                 tf.write(result.stdout.decode("utf-8"))
                 tf.seek(0)
                 self._invoke_wg_command_on_iface(self.CMD_WG_SETCONF, filename=tf.name)
