@@ -21,6 +21,9 @@ class WireGuardInterface:
     CMD_WG_SETCONF = (
         "setconf"  # requires an additional filename argument or piping into the command
     )
+    CMD_WG_SYNCCONF = (
+        "syncconf"  # requires an additional filename argument or piping into the command
+    )
 
     ATTR_PUBLICKEY = "PublicKey"
     ATTR_PRIVATEKEY = "PrivateKey"
@@ -87,7 +90,7 @@ class WireGuardInterface:
                 result.check_returncode()
                 tf.write(result.stdout.decode("utf-8"))
                 tf.seek(0)
-                self._invoke_wg_command_on_iface(self.CMD_WG_SETCONF, filename=tf.name)
+                self._invoke_wg_command_on_iface(self.CMD_WG_SYNCCONF, filename=tf.name)
 
     def add_peer_to_interface(self, peer: WgInteractivePeer):
         allowedips_str = ",".join(
