@@ -163,6 +163,9 @@ class WireGuardInterface:
 
             if attr.startswith("_"):
                 continue
+            
+            if attr == "name":
+                continue
 
             self.iface.add_attr(key=new_peer_key, attr=attr, value=value)
 
