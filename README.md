@@ -5,6 +5,11 @@
 
 ## Installation
 
+Either run the module via [`uvx`](https://docs.astral.sh/uv/guides/tools/)
+```bash
+uvx wg-interactive
+```
+
 Install the module from [PyPI](https://pypi.org/project/wg-interactive/):
 ```bash
 pip install wg-interactive
