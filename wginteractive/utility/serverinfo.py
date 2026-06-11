@@ -7,7 +7,6 @@ from ipaddress import IPv4Address, IPv6Address
 
 
 class ServerInfo:
-
     def __init__(self) -> None:
         pass
 

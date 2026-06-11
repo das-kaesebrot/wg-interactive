@@ -13,7 +13,6 @@ from ..utility.subprocesshandler import SubprocessHandler
 
 
 class WireGuardInterface:
-
     ifacename = ""
 
     CMD_WG_SHOW = "show"
@@ -21,9 +20,7 @@ class WireGuardInterface:
     CMD_WG_SETCONF = (
         "setconf"  # requires an additional filename argument or piping into the command
     )
-    CMD_WG_SYNCCONF = (
-        "syncconf"  # requires an additional filename argument or piping into the command
-    )
+    CMD_WG_SYNCCONF = "syncconf"  # requires an additional filename argument or piping into the command
 
     ATTR_PUBLICKEY = "PublicKey"
     ATTR_PRIVATEKEY = "PrivateKey"
@@ -163,7 +160,7 @@ class WireGuardInterface:
 
             if attr.startswith("_"):
                 continue
-            
+
             if attr == "name":
                 continue
 

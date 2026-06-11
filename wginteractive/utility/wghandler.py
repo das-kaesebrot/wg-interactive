@@ -4,7 +4,6 @@ from ..classes.wginterface import WireGuardInterface
 
 
 class WireGuardHandler:
-
     interfaces: dict[str, WireGuardInterface] = {}
     _wireguard_config_dir: str
 

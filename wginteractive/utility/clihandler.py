@@ -47,10 +47,10 @@ class CliHandler:
         ): "Go back to previous menu",
     }
 
-    TEXT_CLIENT_ENDPOINT_PORT = f"""{bold('Endpoint port')}
+    TEXT_CLIENT_ENDPOINT_PORT = f"""{bold("Endpoint port")}
 Please select an endpoint port to use or input your own:"""
 
-    TEXT_CLIENT_ENDPOINT_HOST = f"""{bold('Endpoint host')}
+    TEXT_CLIENT_ENDPOINT_HOST = f"""{bold("Endpoint host")}
 Since it is not required for a WireGuard server to read its own endpoint domain/IP from the config file, this script needs to provide that value.
 Please select an endpoint host (this server's IP or a FQDN pointing to it) to use in the peer's config file or input your own.
 Examples for valid own inputs:
@@ -58,19 +58,19 @@ vpn.example.com
 11.22.33.44
 Please don't append the port, this will be done automatically!"""
 
-    TEXT_SERVER_ALLOWEDIPS = f"""{bold('AllowedIPs (Server config)')}
+    TEXT_SERVER_ALLOWEDIPS = f"""{bold("AllowedIPs (Server config)")}
 Please select a recommended address or give your own (comma-separated for multiple ranges):"""
 
-    TEXT_CLIENT_ADDRESS = f"""{bold('Address (Client config)')}
+    TEXT_CLIENT_ADDRESS = f"""{bold("Address (Client config)")}
 For the peer sided config - defines the primary IP and subnet for the client.
 Please select a recommended address or give your own (comma-separated for multiple ranges):"""
 
-    TEXT_CLIENT_ALLOWEDIPS = f"""{bold('AllowedIPs (Client config)')}
+    TEXT_CLIENT_ALLOWEDIPS = f"""{bold("AllowedIPs (Client config)")}
 For the peer sided config - defines which network ranges the peer is allowed to access.
 Be aware that a user may change this in their config at any time.
 Please select a range of AllowedIPs or give your own (comma-separated for multiple ranges):"""
 
-    TEXT_SERVER_PEER_NAME = f"""{bold('Peer name')}
+    TEXT_SERVER_PEER_NAME = f"""{bold("Peer name")}
 Please input the peer's name:"""
 
     TEXT_RENAME_NEW_NAME = "Please give a new name for the peer:"
@@ -98,8 +98,10 @@ Please input the peer's name:"""
             self.ACTIONS_MENU.pop(
                 CliHandlerAction.get_str_mapping(CliHandlerAction.FLIP_SYSTEMD)
             )
-        
-        print(f"Host {bold(ServerInfo.get_hostname())} is {green('using systemd' if self.USE_SYSTEMD else red('not using systemd'))}")
+
+        print(
+            f"Host {bold(ServerInfo.get_hostname())} is {green('using systemd' if self.USE_SYSTEMD else red('not using systemd'))}"
+        )
 
     def _refresh_interfaces(self):
         self._wginterfaces = self._wghandler.refresh_interfaces()
@@ -283,9 +285,7 @@ Please input the peer's name:"""
             print("Invalid input, please try again\n")
 
     def _pretty_print_peers(self, iface: WireGuardInterface):
-        print(
-            f"Peers in WireGuard interface {bold(iface.ifacename)}:"
-        )
+        print(f"Peers in WireGuard interface {bold(iface.ifacename)}:")
 
         peers = iface.get_peers_with_name()
         index = 0
@@ -333,7 +333,8 @@ Please input the peer's name:"""
 
     def _add_new_peer_interactively(self, iface: WireGuardInterface):
         clientside_endpoint_port = InputOutputHandler.get_endpoint_port_interactively(
-            self.TEXT_CLIENT_ENDPOINT_PORT, int(iface.iface.interface.get("ListenPort", 0))
+            self.TEXT_CLIENT_ENDPOINT_PORT,
+            int(iface.iface.interface.get("ListenPort", 0)),
         )
         clientside_endpoint_host = InputOutputHandler.get_endpoint_host_interactively(
             self.TEXT_CLIENT_ENDPOINT_HOST, ServerInfo._get_recommended_endpoint_hosts()

@@ -10,8 +10,8 @@ from .validation import Validation
 from .colorformatting import bold, green, red
 from ..classes.wgpeer import WgInteractivePeer
 
-class InputOutputHandler:
 
+class InputOutputHandler:
     PROMPT = "> "
 
     TEMPLATE_PEER_CONF = """[Interface]

@@ -47,7 +47,9 @@ def main():
         default=DEFAULT_WIREGUARD_DIR,
     )
 
-    parser.add_argument("--no-systemd", help="Disable systemd control", action="store_true")
+    parser.add_argument(
+        "--no-systemd", help="Disable systemd control", action="store_true"
+    )
 
     args = parser.parse_args()
 
@@ -59,12 +61,14 @@ def main():
 
     try:
         if not os.access(args.directory, os.R_OK | os.W_OK):
-            logger.error(f"Has to have r/w access to wireguard directory at '{args.directory}'")
+            logger.error(
+                f"Has to have r/w access to wireguard directory at '{args.directory}'"
+            )
             sys.exit(1)
 
         versionstr = __version__
 
-        banner = f"""{bold(f'wg-interactive v{versionstr}')}
+        banner = f"""{bold(f"wg-interactive v{versionstr}")}
 
 An interactive command line tool for modifying and initializing WireGuard server configuration files and adding/deleting peers.
 """

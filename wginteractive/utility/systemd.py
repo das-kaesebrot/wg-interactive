@@ -6,7 +6,6 @@ from ..utility.subprocesshandler import SubprocessHandler
 
 
 class Systemd:
-
     MULTI_USER_TARGET_WANTS_FOLDER = "/etc/systemd/system/multi-user.target.wants"
 
     CMD_ENABLE = "enable"
