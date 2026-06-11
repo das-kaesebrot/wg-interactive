@@ -54,9 +54,8 @@ def main():
     logger = logging.getLogger(__name__)
 
     try:
-        # Check if program is being run as root
-        if not os.geteuid() == 0:
-            logger.error("Has to run as root")
+        if not os.access(args.directory, os.R_OK | os.W_OK):
+            logger.error(f"Has to have r/w access to wireguard directory at '{args.directory}'")
             sys.exit(1)
 
         versionstr = __version__
