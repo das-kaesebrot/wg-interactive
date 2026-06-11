@@ -10,6 +10,8 @@ from .utility.colorformatting import bold
 
 
 def main():
+    DEFAULT_WIREGUARD_DIR = "/etc/wireguard"
+
     # set up logging config via argparse
     # custom behaviour for python versions < 3.11 as the level names mapping func was only added to the logging lib in 3.11
     if version_info[1] >= 11:
@@ -42,7 +44,7 @@ def main():
         help="WireGuard config directory",
         type=str,
         required=False,
-        default="/etc/wireguard",
+        default=DEFAULT_WIREGUARD_DIR,
     )
 
     args = parser.parse_args()
