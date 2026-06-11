@@ -86,13 +86,13 @@ Please input the peer's name:"""
 
     _wireguard_config_dir: str
 
-    def __init__(self, wireguard_config_dir: str) -> None:
+    def __init__(self, wireguard_config_dir: str, use_systemd: bool = True) -> None:
         self._logger = logging.getLogger(__name__)
         self._wireguard_config_dir = wireguard_config_dir
         self._wghandler = WireGuardHandler(self._wireguard_config_dir)
         self._refresh_interfaces()
 
-        self.USE_SYSTEMD = Systemd.host_is_using_systemd()
+        self.USE_SYSTEMD = Systemd.host_is_using_systemd() if use_systemd else False
 
         if not self.USE_SYSTEMD:
             self.ACTIONS_MENU.pop(

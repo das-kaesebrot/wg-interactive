@@ -47,6 +47,8 @@ def main():
         default=DEFAULT_WIREGUARD_DIR,
     )
 
+    parser.add_argument("--no-systemd", help="Disable systemd control", action="store_true")
+
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -69,7 +71,7 @@ An interactive command line tool for modifying and initializing WireGuard server
 
         print(banner)
 
-        handler = CliHandler(args.directory)
+        handler = CliHandler(args.directory, not args.no_systemd)
         handler.handle()
 
     except NotImplementedError as e:
